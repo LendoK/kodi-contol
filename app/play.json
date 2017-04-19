@@ -1,0 +1,7 @@
+{
+  "name": "sh",
+  "description": "shell",
+  "path": "/home/armin/Schreibtisch/WorkingCloud/webextension/kodicommander/shell/play.sh",
+  "type": "stdio",
+  "allowed_extensions": [ "koco@example.org" ]
+}

@@ -1,0 +1,52 @@
+{
+
+  "manifest_version": 2,
+  "name": "kodicommander",
+  "version": "1.0",
+  "default_locale": "en",
+  "author": "Keilbaum",
+
+  "description": "Sends Media to Kodi. Based on Youtube to Kodi by Regss",
+
+  "icons": {
+    "96": "icons/kodi96.png" 
+  },
+
+   "applications": {
+    "gecko": {
+      "id": "koco@example.org",
+      "strict_min_version": "50.0"
+    }
+  },
+
+    "permissions": [
+    "activeTab",
+    // "nativeMessaging",
+    "storage",
+    "webRequest",
+    // "webRequestBlocking",
+     "<all_urls>",
+     "contextMenus",
+     "notifications"
+  ],
+
+   "browser_action": {
+    "default_icon": "icons/kodi96.png",
+    "default_title": "kodicommander",
+    "default_popup": "popup/popup.html"
+  },
+    "options_ui": {
+    "page": "options.html"
+  },
+
+  "background": {
+      "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["kodicommander.js"]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+html, body {
+  width: 200px;
+}
+
+.button {
+  margin: 3% auto;
+  padding: 4px;
+  text-align: center;
+  font-size: 1.0em;
+  cursor: pointer;
+}
+
+.action:hover {
+  background-color: #CFF2F2;
+}
+
+.action {
+ background-color: #E5F2F2;
+}
+
+.clear {
+ background-color: #FBFBC9;
+}
+
+.clear:hover {
+ background-color: #EAEAC9;
+}

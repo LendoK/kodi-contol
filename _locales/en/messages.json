@@ -1,0 +1,33 @@
+{
+  "extensionName": {
+    "message": "Kodi Context",
+    "description": "Name of the extension."
+  },
+
+  "extensionDescription": {
+    "message": "Demonstrates the contextMenus API.",
+    "description": "Description of the add-on."
+  },
+
+  "contextMenuItemSelectionLogger": {
+    "message": "Log '%s' to the browser console",
+    "description": "Title of context menu item that logs the selected text when clicked."
+  },
+
+   "contextSendToKodi": {
+    "message": "send $URL$ to kodi",
+    "description": "Title of context menu item that logs the selected text when clicked.",
+    "placeholders": {
+      "url" : {
+        "content" : "$1",
+        "example" : "example.png"
+      }
+    }
+  },
+
+  "contextMenuItemRemoveMe": {
+    "message": "Remove me!",
+    "description": "Title of context menu item that removes itself when clicked."
+  }
+
+}
