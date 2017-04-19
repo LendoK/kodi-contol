@@ -31,6 +31,10 @@ function startaction(action) {
       // stop();
       browser.runtime.sendMessage({"selectedId": "playing"});
       break;
+     case "mute":
+      // stop();
+      browser.runtime.sendMessage({"selectedId": "b_volmute"});
+      break;
   }
 }
 

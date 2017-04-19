@@ -254,9 +254,11 @@ function idToURL(id) {
         case "b_volmute":
             var data = {"method": "Input.ExecuteAction", "params": ["mute"]};
             getHostData(data);
+            break;
         case "b_volup":
             var data = {"method": "Input.ExecuteAction", "params": ["volumeup"]};
             getHostData(data);
+            break;            
         case "b_voldown":
             var data = {"method": "Input.ExecuteAction", "params": ["volumedown"]};
             getHostData(data);
@@ -336,7 +338,7 @@ function encodeQueryData(data) {
 function get_volume(resp){
     var json = JSON.parse(resp);
     console.log(json["result"]);
-    volume = json["result"]["volume"];
+    kodi_volume = json["result"]["volume"];
 
 }
 
@@ -356,9 +358,10 @@ function handleMessage(request, sender, sendResponse) {
     kodi_volume = request.volume;
   }else if(request.onload){
     console.log("Message from the Popup script: " +request.greeting);
-    // var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
+    var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
+    getHostData2(data, get_volume, true);
     // sendResponse({response: "Response from background script", url: media_list[0]["name"], volume: kodi_volume});
-    sendResponse({response: "Response from background script", volume: kodi_volume});
+    sendResponse({response: "Response from background script", url: media_list, volume: kodi_volume});
   }
 }
 
