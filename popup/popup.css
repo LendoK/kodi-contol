@@ -26,16 +26,8 @@ html, body {
  background-color: #EAEAC9;
 }
 
-.list:hover {
-  background-color: #445CC9;
-  
-}
 
 .list {
- background-color: #E5F2F2;
- 
- border-style: solid;
- border-width: 1px;
   white-space: nowrap;
     width: 100%;                   /* IE6 needs any width */
     overflow: hidden;              /* "overflow" value must be different from  visible"*/ 
@@ -45,14 +37,59 @@ html, body {
 
 ul {
   list-style-type: none;
+  width: 100%;
 }
-
 .item {
+  margin-left: 0;
+  background-size: 20px 20px;
   margin: 1% auto;
   padding: 2px;
+  width: 80%;
+  height: 20px;
+  /*float: left;*/
+  display: block;
   text-align: center;
   font-size: 0.5em;
   cursor: pointer;
+  background-repeat:no-repeat;
+  padding-left: 25px;
   
 }
+
+
+li:hover {
+  background: #eee;
+  cursor: pointer;
+}
+
+.youtube {
+  background-image: url('/icons/Youtube.svg');
+
+}
+.mp4 {
+  background-image: url('/icons/MP4_icon.svg');
+  
+}
+* {margin: 0; padding: 0;}
+
+
+h3 {
+  font: bold 20px/1.5 Helvetica, Verdana, sans-serif;
+}
+
+li img {
+  float: left;
+  margin: 0 15px 0 0;
+}
+
+li p {
+  font: 200 12px/1.5 Georgia, Times New Roman, serif;
+ 
+}
+
+li {
+  padding: 5px;
+  overflow: auto;
+}
+
 

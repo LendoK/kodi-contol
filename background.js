@@ -10,7 +10,7 @@ var kodi_volume;
 function check_media(filepath){  
     // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
     // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
-    if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
+    if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|ts)+/i.test(filepath)){
         // if(/\(ping)+/i.test(filepath)){
         //     console.log("failed"+ filepath);
         //     return false;
@@ -39,11 +39,35 @@ function logURL(requestDetails) {
         }
         singleObj['name'] = filename;
         singleObj['path'] = requestDetails.url;
+        singleObj['type'] = "video";
         media_list.push(singleObj);
         console.log("Loading: " + singleObj['name']);  
-        if(media_list.length > 6){
-            media_list.shift();
+    }
+    var matchVideo = videoPattern.exec(requestDetails.url);
+    var matchList = playlistPattern.exec(requestDetails.url);
+
+    if(matchVideo || matchList){
+        console.log("found youtube video");
+        var singleObj = {};
+        var i =0;
+        if(matchVideo){
+            filename = matchVideo[0];
+        }else{
+            filename = matchList[0];
         }
+        for(i = 0; i < media_list.length; i++){
+            if(media_list[i]['name'] == filename){
+                return;
+            }
+        }
+        singleObj['name'] = filename;
+        singleObj['path'] = requestDetails.url;
+        singleObj['type'] = "youtube";
+
+        media_list.push(singleObj);
+    }
+    if(media_list.length > 10){
+        media_list.shift();
     }
 }
 
@@ -96,25 +120,23 @@ browser.contextMenus.onClicked.addListener(function(info, tab) {
     case "send-kodi":
       console.log("from context menu: " , info.srcUrl);
       var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":info.srcUrl}},"id":1};
-      getHostData(data);
+      getHostData2(data,parseJSON);
       break;
   }
 });
 
 function play_media(id){
     if(media_list[id]){
-        var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":media_list[id]["path"]}},"id":1};
-        getHostData(data);
+        if(media_list[id]["type"] == "video"){
+            var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":media_list[id]["path"]}},"id":1};
+            getHostData2(data,parseJSON);
+        }if(media_list[id]["type"] == "youtube"){
+            var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
+            parseYoutubeURL(data,media_list[id]["path"]);
+        }
     }else{
         notify("Error Nothing to play");
     }
-}
-
-function getHostData(data) {
-    var getting = browser.storage.local.get(null, function(result){
-        var hostData = result;
-        sendRequestToKODI(data, hostData);
-    });
 }
 
 function getHostData2(data, func, note) {
@@ -149,32 +171,6 @@ function sendRequestToKODI2(data, hostData, func, note) {
     };
     xhr.send();
 }
-
-
-function sendRequestToKODI(data, hostData) {
-    
-    var xhr = new XMLHttpRequest();
-    
-    data["jsonrpc"] = "2.0";
-    data["id"] = 1;
-    
-    console.log(hostData);
-    console.log(JSON.stringify(data));
-    xhr.open("GET", "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc?request=" + JSON.stringify(data), true);
-    xhr.timeout = 5000;
-    xhr.onreadystatechange = function (aEvt) {
-        if (xhr.readyState == 4) {
-            if(xhr.status == 200) {
-                var resp = xhr.responseText;
-                parseJSON(resp);
-            } else {
-                notify("Error Sending request to KODI");
-            }
-        }
-    };
-    xhr.send();
-}
-
 
 function onGot(item) {
   console.log(item);
@@ -246,39 +242,39 @@ function idToURL(id, mediaid) {
     switch (id) {
         case "b_play":
             var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
-            getURLfromTab(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_queue":
             var data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": ""}}};
-            getURLfromTab(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_clearlist":
             var data = {"method": "Playlist.Clear", "params": {"playlistid":1}};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_pause":
             var data = {"method": "Input.ExecuteAction", "params": ["pause"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_stop":
             var data = {"method": "Input.ExecuteAction", "params": ["stop"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_skipprevious":
             var data = {"method": "Input.ExecuteAction", "params": ["skipprevious"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_volmute":
             var data = {"method": "Input.ExecuteAction", "params": ["mute"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "b_volup":
             var data = {"method": "Input.ExecuteAction", "params": ["volumeup"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;            
         case "b_voldown":
             var data = {"method": "Input.ExecuteAction", "params": ["volumedown"]};
-            getHostData(data);
+            getHostData2(data,parseJSON);
             break;
         case "playpause":
             var data = {"method": "Input.ExecuteAction", "params": ["pause"]};
@@ -337,7 +333,7 @@ function parseYoutubeURL(data, url) {
         play_media();
     } else {
         data["params"]["item"]["file"] = "plugin%3A%2F%2Fplugin.video.youtube%2Fplay%2F%3F" + encodeQueryData(yt_data)
-        getHostData(data);
+        getHostData2(data,parseJSON);
     }
 }
 

@@ -84,15 +84,22 @@ function creat_media_list(mlist){
     for (i = 0; i < mlist.length; i++) {
       var node = document.createElement("LI");                 // Create a <li> node
       var div = document.createElement("div");
-      div.className = "list item";
+      // var icon = document.createElement("div");
+      // icon.class ="listicon";
+      // icon.appendChild(document.createTextNode(" "));
+      // div.appendChild(icon);
+      if(mlist[i]["type"] == "youtube"){
+        div.className = "list item youtube";
+      }else{
+        div.className = "list item mp4";
+      }
       div.id = i;
       var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
       div.appendChild(textnode);
       node.appendChild(div);    
       list.appendChild(node);
     }
-
-    
+ 
 }
 
 
