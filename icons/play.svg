@@ -17,7 +17,40 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="play.svg">
   <defs
-     id="defs4" />
+     id="defs4">
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drop Shadow"
+       id="filter3567">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood3569" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite3571" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="30.6011"
+         result="blur"
+         id="feGaussianBlur3573" />
+      <feOffset
+         dx="13.9"
+         dy="19.4"
+         result="offset"
+         id="feOffset3575" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite3577" />
+    </filter>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -25,15 +58,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="664.73959"
-     inkscape:cy="604.22426"
+     inkscape:zoom="1.5339844"
+     inkscape:cx="814.97848"
+     inkscape:cy="448.56614"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1053"
-     inkscape:window-x="1680"
+     inkscape:window-width="2560"
+     inkscape:window-height="1376"
+     inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
@@ -44,7 +77,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -54,7 +87,7 @@
      id="layer1"
      transform="translate(0,-343.70079)">
     <path
-       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ff0000;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter3567)"
        d="m 142.93659,465.46357 0,452.54834 442.95214,-224.25386 z"
        id="path3350"
        inkscape:connector-curvature="0"

@@ -20,10 +20,20 @@ send_json()
 # Dialog box?
 input="$1"
 
+nc -lp 1234< "$input" &
+trap "kill $!" EXIT
+	
+url="tcp://192.168.178.39:1234"
+
 
 # if [[ $input =~ \.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff)(\?.*)?$ ]]; then
 #      url="$input"
 # fi
 #  & echo  "play from send"
 
-send_json "$input" && echo "$input"
+send_json "$url" 
+
+# Wait for netcat to exit
+wait
+# Don't kill netcat
+trap - EXIT &&

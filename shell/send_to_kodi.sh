@@ -9,7 +9,8 @@ user=osmc
 pass=NebihureOC
 
 # Settings for netcat (local file)
-local_hostname=$(hostname)
+local_hostname=192.168.178.39
+# local_hostname=$(hostname)
 local_port=12345
 
 

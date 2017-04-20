@@ -25,3 +25,34 @@ html, body {
 .clear:hover {
  background-color: #EAEAC9;
 }
+
+.list:hover {
+  background-color: #445CC9;
+  
+}
+
+.list {
+ background-color: #E5F2F2;
+ 
+ border-style: solid;
+ border-width: 1px;
+  white-space: nowrap;
+    width: 100%;                   /* IE6 needs any width */
+    overflow: hidden;              /* "overflow" value must be different from  visible"*/ 
+    -o-text-overflow: ellipsis;    /* Opera < 11*/
+    text-overflow:    ellipsis;  
+}
+
+ul {
+  list-style-type: none;
+}
+
+.item {
+  margin: 1% auto;
+  padding: 2px;
+  text-align: center;
+  font-size: 0.5em;
+  cursor: pointer;
+  
+}
+

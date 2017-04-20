@@ -13,7 +13,7 @@ function onError(error) {
 }
 
 
-function startaction(action) {
+function startaction(action, id) {
   switch (action) {
     case "Play/Pause":
       console.log("start playing or pause");
@@ -21,7 +21,7 @@ function startaction(action) {
      break;
     case "Play Media":
 
-      browser.runtime.sendMessage({"selectedId": "playmedia"});
+      browser.runtime.sendMessage({"selectedId": "playmedia", "id": id});
       break;
     case "Stop":
       // stop();
@@ -35,6 +35,10 @@ function startaction(action) {
       // stop();
       browser.runtime.sendMessage({"selectedId": "b_volmute"});
       break;
+     case "Send local file":
+      // stop();
+      openMyPage()
+      break;
   }
 }
 
@@ -45,6 +49,7 @@ function handleResponse(message) {
   if(message.url){
     console.log(`path:  ${message.url}`);
     media = message.url;
+    creat_media_list(message.url);
   }
   if(message.volume){
     console.log("load volume");
@@ -67,37 +72,58 @@ function notifyBackgroundPage() {
 window.addEventListener("load", OnLoad, false);
 
 function OnLoad() {
-    console.log("POPUP: OnLoad");
+    console.log("POPUP: OnLoad");  
     notifyBackgroundPage();
     
     // var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
 }
 
+function creat_media_list(mlist){
+    var i;
+    var list = document.getElementById("media_list");
+    for (i = 0; i < mlist.length; i++) {
+      var node = document.createElement("LI");                 // Create a <li> node
+      var div = document.createElement("div");
+      div.className = "list item";
+      div.id = i;
+      var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
+      div.appendChild(textnode);
+      node.appendChild(div);    
+      list.appendChild(node);
+    }
+
+    
+}
+
 
 document.addEventListener("click", (e) => {
+  console.log("click: " +e.target.id);
+  var id = 0;
   if (e.target.classList.contains("action")) {
     var action = e.target.textContent;
-    // var chosenBeastURL = beastNameToURL(chosenBeast);
-    startaction(action);
-    console.log("event listener");
-    
-    // browser.tabs.executeScript(null, { 
-    //   file: "kodicommander.js" 
-    // });
-
-    // var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
-    // gettingActiveTab.then((tabs) => {
-    //   browser.tabs.sendMessage(tabs[0].id, {beastURL: chosenBeastURL});
-    // });
+    console.log("action: "+action);
   }
-  // else if (e.target.classList.contains("clear")) {
-  //   browser.tabs.reload();
-  //   window.close();
-  // }
+  if(e.target.classList.contains("item")){
+      id = e.target.id;
+
+      console.log("play from media list" +e.target.id);
+      var action = "Play Media";
+  }
+
+
+    startaction(action, id);
+    console.log("event listener");
 });
 
 document.addEventListener("input", function(e){ 
   console.log("volume bar"+ e.target.value );
   browser.runtime.sendMessage({"volume": e.target.value });
 });
+
+function openMyPage() {
+  console.log("injecting");
+   browser.tabs.create({
+     "url": "/local_files/local_files.html"
+   });
+}
 

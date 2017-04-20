@@ -11,22 +11,39 @@ function check_media(filepath){
     // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
     // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
     if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
-        return true;
+        // if(/\(ping)+/i.test(filepath)){
+        //     console.log("failed"+ filepath);
+        //     return false;
+        // }else{
+            return true;
+        // }
     }
+    // else{
+    //     return false;
+    // }
 }
 
 
 function logURL(requestDetails) {
-    media_list = [];
     // console.log(requestDetails.url);
     if (check_media(requestDetails.url)){
+        // media_list = [];
         // console.log("Loading: " + requestDetails.url);
         var filename = requestDetails.url.replace(/^.*[\\\/]/, '');
-        var singleObj = {}
+        var singleObj = {};
+        var i =0;
+        for(i = 0; i < media_list.length; i++){
+            if(media_list[i]['name'] == filename){
+                return;
+            }
+        }
         singleObj['name'] = filename;
         singleObj['path'] = requestDetails.url;
         media_list.push(singleObj);
         console.log("Loading: " + singleObj['name']);  
+        if(media_list.length > 6){
+            media_list.shift();
+        }
     }
 }
 
@@ -84,9 +101,9 @@ browser.contextMenus.onClicked.addListener(function(info, tab) {
   }
 });
 
-function play_media(){
-    if(media_list[0]){
-        var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":media_list[0]["path"]}},"id":1};
+function play_media(id){
+    if(media_list[id]){
+        var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":media_list[id]["path"]}},"id":1};
         getHostData(data);
     }else{
         notify("Error Nothing to play");
@@ -225,7 +242,7 @@ function notify(message) {
     });
 }
 
-function idToURL(id) {
+function idToURL(id, mediaid) {
     switch (id) {
         case "b_play":
             var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
@@ -269,9 +286,9 @@ function idToURL(id) {
             getHostData2(data,parseJSON);
             break;
         case "playmedia":
-            var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
-            getURLfromTab(data);
-            // play_media();
+            // var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
+            // getURLfromTab(data);
+            play_media(mediaid);
             break;
         case "playing":
             getHostData2();
@@ -351,7 +368,7 @@ function set_volume(volume){
 
 function handleMessage(request, sender, sendResponse) {
   if(request.selectedId){
-      idToURL(request.selectedId);
+      idToURL(request.selectedId, request.id);
       console.log("selectedID empfangengen");
   }else if(request.volume){
     set_volume(request.volume);
