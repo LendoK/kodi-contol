@@ -64,6 +64,7 @@ function logURL(requestDetails) {
         singleObj['name'] = filename;
         singleObj['path'] = requestDetails.url;
         singleObj['type'] = "youtube";
+        // get_yt_title(matchVideo[1]);
 
         media_list.push(singleObj);
     }
@@ -79,7 +80,23 @@ browser.webRequest.onBeforeRequest.addListener(
     {urls: ["<all_urls>"]}
 );
 
+// function get_yt_title(youtubeid){
+//     var xhr = new XMLHttpRequest();
+//     var apikey = 0;
+//     // https://www.googleapis.com/youtube/v3/videos?part=snippet&id={YOUTUBE_VIDEO_ID}&fields=items(id%2Csnippet)&key={YOUR_API_KEY}
+//     xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + youtubeid);
+//     xhr.timeout = 5000;
+//     xhr.onreadystatechange = function (aEvt) {
+//     if (xhr.readyState == 4) {
+//         if(xhr.status == 200 && func) {
+//             var resp = xhr.responseText;
+//             console.log(resp);
 
+//         }
+//     };
+//     xhr.send();
+//     // return resp[]
+// }
 /*
 Called when the item has been created, or when creation failed due to an error.
 We'll just log success/failure here.
@@ -286,6 +303,34 @@ function idToURL(id, mediaid) {
             break;            
         case "b_voldown":
             var data = {"method": "Input.ExecuteAction", "params": ["volumedown"]};
+            getHostData2(data,parseJSON);
+            break;
+        case "up":
+            var data = {"method": "Input.Up", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "down":
+            var data = {"method": "Input.Down", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "left":
+            var data = {"method": "Input.Left", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "right":
+            var data = {"method": "Input.Right", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "ok":
+            var data = {"method": "Input.Select", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "back":
+            var data = {"method": "Input.Back", "params": []};
+            getHostData2(data,parseJSON);
+            break;
+         case "context":
+            var data = {"method": "Input.ContextMenu", "params": []};
             getHostData2(data,parseJSON);
             break;
         case "playpause":

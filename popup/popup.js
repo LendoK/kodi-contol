@@ -26,27 +26,42 @@ function startaction(action, id) {
       browser.runtime.sendMessage({"selectedId": "queue Media", "id": id});
       break;
     case "Stop":
-      // stop();
       browser.runtime.sendMessage({"selectedId": "b_stop"});
       break;
     case "playing":
-      // stop();
       browser.runtime.sendMessage({"selectedId": "playing"});
       break;
     case "mute":
-      // stop();
       browser.runtime.sendMessage({"selectedId": "b_volmute"});
       break;
     case "prev":
-      // stop();
       browser.runtime.sendMessage({"selectedId": "b_skipprevious"});
       break;
     case "next":
-      // stop();
       browser.runtime.sendMessage({"selectedId": "next"});
       break;
+    case "up":
+      browser.runtime.sendMessage({"selectedId": "up"});
+      break;
+    case "down":
+      browser.runtime.sendMessage({"selectedId": "down"});
+      break;
+    case "left":
+      browser.runtime.sendMessage({"selectedId": "left"});
+      break;
+    case "right":
+      browser.runtime.sendMessage({"selectedId": "right"});
+      break;
+    case "ok":
+      browser.runtime.sendMessage({"selectedId": "ok"});
+      break;
+    case "back":
+      browser.runtime.sendMessage({"selectedId": "back"});
+      break;
+    case "context":
+      browser.runtime.sendMessage({"selectedId": "context"});
+      break;
      case "Send local file":
-      // stop();
       openMyPage()
       break;
   }
@@ -80,6 +95,12 @@ function notifyBackgroundPage() {
 
 
 window.addEventListener("load", OnLoad, false);
+window.addEventListener("wheel", OnWheel, true);
+
+function OnWheel(){
+  var wheelEvent = new WheelEvent(null,null); 
+  console.log("maus rad: " +wheelEvent.deltaY);
+}
 
 function OnLoad() {
     console.log("POPUP: OnLoad");  
