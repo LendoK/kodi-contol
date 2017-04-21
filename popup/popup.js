@@ -20,20 +20,30 @@ function startaction(action, id) {
      browser.runtime.sendMessage({"selectedId": "playpause"});
      break;
     case "Play Media":
-
       browser.runtime.sendMessage({"selectedId": "playmedia", "id": id});
+      break;
+    case "queue Media":
+      browser.runtime.sendMessage({"selectedId": "queue Media", "id": id});
       break;
     case "Stop":
       // stop();
       browser.runtime.sendMessage({"selectedId": "b_stop"});
       break;
-     case "playing":
+    case "playing":
       // stop();
       browser.runtime.sendMessage({"selectedId": "playing"});
       break;
-     case "mute":
+    case "mute":
       // stop();
       browser.runtime.sendMessage({"selectedId": "b_volmute"});
+      break;
+    case "prev":
+      // stop();
+      browser.runtime.sendMessage({"selectedId": "b_skipprevious"});
+      break;
+    case "next":
+      // stop();
+      browser.runtime.sendMessage({"selectedId": "next"});
       break;
      case "Send local file":
       // stop();
@@ -82,12 +92,16 @@ function creat_media_list(mlist){
     var i;
     var list = document.getElementById("media_list");
     for (i = 0; i < mlist.length; i++) {
+      var container = document.createElement("div");
       var node = document.createElement("LI");                 // Create a <li> node
       var div = document.createElement("div");
-      // var icon = document.createElement("div");
-      // icon.class ="listicon";
-      // icon.appendChild(document.createTextNode(" "));
-      // div.appendChild(icon);
+      container.appendChild(div);
+      var quere = document.createElement("div");
+      quere.id = i;
+      quere.className ="list item quere";
+      container.appendChild(quere);
+      // div.appendChild(quere);
+      
       if(mlist[i]["type"] == "youtube"){
         div.className = "list item youtube";
       }else{
@@ -96,7 +110,7 @@ function creat_media_list(mlist){
       div.id = i;
       var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
       div.appendChild(textnode);
-      node.appendChild(div);    
+      node.appendChild(container);    
       list.appendChild(node);
     }
  
@@ -107,7 +121,7 @@ document.addEventListener("click", (e) => {
   console.log("click: " +e.target.id);
   var id = 0;
   if (e.target.classList.contains("action")) {
-    var action = e.target.textContent;
+    var action = e.target.id;
     console.log("action: "+action);
   }
   if(e.target.classList.contains("item")){
@@ -116,7 +130,10 @@ document.addEventListener("click", (e) => {
       console.log("play from media list" +e.target.id);
       var action = "Play Media";
   }
-
+  if(e.target.classList.contains("quere")){
+      action = "queue Media";
+      id = e.target.id;
+  }
 
     startaction(action, id);
     console.log("event listener");

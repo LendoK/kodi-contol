@@ -10,7 +10,8 @@ var kodi_volume;
 function check_media(filepath){  
     // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
     // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
-    if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|ts)+/i.test(filepath)){
+        // |ts
+    if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
         // if(/\(ping)+/i.test(filepath)){
         //     console.log("failed"+ filepath);
         //     return false;
@@ -125,13 +126,19 @@ browser.contextMenus.onClicked.addListener(function(info, tab) {
   }
 });
 
-function play_media(id){
+function play_media(id, queue){
     if(media_list[id]){
         if(media_list[id]["type"] == "video"){
             var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":media_list[id]["path"]}},"id":1};
+            if(queue){
+                 data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": media_list[id]["path"]}}};
+            }
             getHostData2(data,parseJSON);
         }if(media_list[id]["type"] == "youtube"){
             var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
+            if(queue){
+                data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": media_list[id]["path"]}}};
+            }
             parseYoutubeURL(data,media_list[id]["path"]);
         }
     }else{
@@ -244,9 +251,10 @@ function idToURL(id, mediaid) {
             var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
             getHostData2(data,parseJSON);
             break;
-        case "b_queue":
-            var data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": ""}}};
-            getHostData2(data,parseJSON);
+        case "queue Media":
+            // var data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": ""}}};
+            // getHostData2(data,parseJSON);
+            play_media(mediaid,true);
             break;
         case "b_clearlist":
             var data = {"method": "Playlist.Clear", "params": {"playlistid":1}};
@@ -262,6 +270,10 @@ function idToURL(id, mediaid) {
             break;
         case "b_skipprevious":
             var data = {"method": "Input.ExecuteAction", "params": ["skipprevious"]};
+            getHostData2(data,parseJSON);
+            break;
+        case "next":
+            var data = {"method": "Input.ExecuteAction", "params": ["skipnext"]};
             getHostData2(data,parseJSON);
             break;
         case "b_volmute":
@@ -284,7 +296,7 @@ function idToURL(id, mediaid) {
         case "playmedia":
             // var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
             // getURLfromTab(data);
-            play_media(mediaid);
+            play_media(mediaid,false);
             break;
         case "playing":
             getHostData2();
