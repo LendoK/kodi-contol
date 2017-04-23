@@ -35,7 +35,7 @@ function startaction(action, id) {
       browser.runtime.sendMessage({"selectedId": "b_volmute"});
       break;
     case "prev":
-      browser.runtime.sendMessage({"selectedId": "b_skipprevious"});
+      browser.runtime.sendMessage({"selectedId": "prev"});
       break;
     case "next":
       browser.runtime.sendMessage({"selectedId": "next"});
@@ -61,12 +61,17 @@ function startaction(action, id) {
     case "context":
       browser.runtime.sendMessage({"selectedId": "context"});
       break;
-     case "Send local file":
+    case "text":
+      // var text = prompt("Send string to Kodi");
+      // browser.runtime.sendMessage({"selectedId": "text"});
+      // var func => {var text = window.prompt("send string to Kodi", "Hello Kodi");};
+      // browser.runtime.sendMessage({"selectedId": "context"});
+      break;
+    case "Send local file":
       openMyPage()
       break;
   }
 }
-
 
 
 function handleResponse(message) {
@@ -96,10 +101,48 @@ function notifyBackgroundPage() {
 
 window.addEventListener("load", OnLoad, false);
 window.addEventListener("wheel", OnWheel, true);
+window.addEventListener("keydown", OnKeyDown, false);
 
-function OnWheel(){
-  var wheelEvent = new WheelEvent(null,null); 
-  console.log("maus rad: " +wheelEvent.deltaY);
+function OnKeyDown(e){
+  var key = e.key; 
+  console.log("key: "+ e.key);
+  switch (key) {
+    case "ArrowUp":
+      startaction("up", 0) 
+    break;
+    case "ArrowDown":
+      startaction("down", 0) 
+    break;
+    case "ArrowLeft":
+      startaction("left", 0) 
+    break;
+    case "ArrowRight":
+      startaction("right", 0) 
+    break;
+    case "Enter":
+      startaction("ok", 0) 
+    break;
+    case "Backspace":
+      startaction("back", 0) 
+    break;
+    case "Space":
+      startaction("right", 0) 
+    break;
+    case "Control":
+      startaction("context", 0) 
+    break;
+  }
+}
+
+function OnWheel(e){
+  // var wheelEvent = new WheelEvent(null,null); 
+  var delta = e.deltaY;
+  // console.log("maus rad: " +e.deltaY);
+  if(delta < 0){
+    startaction("up", 0)
+  }else{
+    startaction("down", 0)
+  }
 }
 
 function OnLoad() {

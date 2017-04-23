@@ -19,6 +19,8 @@ function get_settings(){
         var re = new RegExp(ip);
         ip2 = ip;
     });
+    var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
+    getHostData2(data, get_volume, true);
 }
 
 function check_media(filepath){  
@@ -176,6 +178,7 @@ browser.contextMenus.create({
 }, onCreated);
 
 
+
 function play_media(id, queue){
     if(media_list[id]){
         if(media_list[id]["type"] == "video"){
@@ -239,6 +242,12 @@ function parseJSON(resp) {
 }
 
 
+function send_text(){
+  var text = window.prompt("send string to Kodi", "Hello Kodi");
+  console.log("der text:"+text);
+}
+
+
 function idToURL(id, mediaid) {
     switch (id) {
         case "b_play":
@@ -262,7 +271,7 @@ function idToURL(id, mediaid) {
             var data = {"method": "Input.ExecuteAction", "params": ["stop"]};
             getHostData2(data,parseJSON);
             break;
-        case "b_skipprevious":
+        case "prev":
             var data = {"method": "Input.ExecuteAction", "params": ["skipprevious"]};
             getHostData2(data,parseJSON);
             break;
@@ -309,6 +318,9 @@ function idToURL(id, mediaid) {
          case "context":
             var data = {"method": "Input.ContextMenu", "params": []};
             getHostData2(data,parseJSON);
+            break;
+        case "text":
+            // send_text();
             break;
         case "playpause":
             var data = {"method": "Input.ExecuteAction", "params": ["pause"]};
