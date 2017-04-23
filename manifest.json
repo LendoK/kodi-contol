@@ -1,7 +1,7 @@
 {
 
   "manifest_version": 2,
-  "name": "kodicommander",
+  "name": "kodi control",
   "version": "1.0",
   "default_locale": "en",
   "author": "Keilbaum",

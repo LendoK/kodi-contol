@@ -11,6 +11,19 @@ function check_media(filepath){
     // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
     // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
         // |ts
+
+    var ip2 = 0;
+    var gettingItem = browser.storage.local.get('host');
+    gettingItem.then((res) => {
+        var ip = res.host
+        console.log("host: " + ip);
+        var re = new RegExp(ip);
+        ip2 = ip;
+    });
+    console.log("ip2: "+ ip2);
+    // if(re.test(filepath)){
+    //     return false;
+    // }
     if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
         // if(/\(ping)+/i.test(filepath)){
         //     console.log("failed"+ filepath);
@@ -27,10 +40,11 @@ function check_media(filepath){
 
 function logURL(requestDetails) {
     // console.log(requestDetails.url);
-    if (check_media(requestDetails.url)){
+    var url = requestDetails.url;
+    if (check_media(url)){
         // media_list = [];
         // console.log("Loading: " + requestDetails.url);
-        var filename = requestDetails.url.replace(/^.*[\\\/]/, '');
+        var filename = url.replace(/^.*[\\\/]/, '');
         var singleObj = {};
         var i =0;
         for(i = 0; i < media_list.length; i++){
@@ -39,13 +53,14 @@ function logURL(requestDetails) {
             }
         }
         singleObj['name'] = filename;
-        singleObj['path'] = requestDetails.url;
+        singleObj['path'] = url;
         singleObj['type'] = "video";
+        singleObj['domain'] = extractRootDomain(url);
         media_list.push(singleObj);
         console.log("Loading: " + singleObj['name']);  
     }
-    var matchVideo = videoPattern.exec(requestDetails.url);
-    var matchList = playlistPattern.exec(requestDetails.url);
+    var matchVideo = videoPattern.exec(url);
+    var matchList = playlistPattern.exec(url);
 
     if(matchVideo || matchList){
         console.log("found youtube video");
@@ -62,8 +77,9 @@ function logURL(requestDetails) {
             }
         }
         singleObj['name'] = filename;
-        singleObj['path'] = requestDetails.url;
+        singleObj['path'] = url;
         singleObj['type'] = "youtube";
+        singleObj['domain'] = extractRootDomain(url);
         // get_yt_title(matchVideo[1]);
 
         media_list.push(singleObj);
@@ -73,30 +89,61 @@ function logURL(requestDetails) {
     }
 }
 
+function extractHostname(url) {
+    var hostname;
+    //find & remove protocol (http, ftp, etc.) and get the hostname
+    if (url.indexOf("://") > -1) {
+        hostname = url.split('/')[2];
+    }
+    else {
+        hostname = url.split('/')[0];
+    }
+
+    //find & remove port number
+    hostname = hostname.split(':')[0];
+
+    return hostname;
+}
+
+function extractRootDomain(url) {
+    var domain = extractHostname(url),
+        splitArr = domain.split('.'),
+        arrLen = splitArr.length;
+
+    //extracting the root domain here
+    if (arrLen > 2) {
+        domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+    }
+    return domain;
+}
+
+
 browser.webRequest.onBeforeRequest.addListener(
   logURL,
 //   {urls:[pattern], types:["image"]},
 //   {urls:[pattern], types:["media"]}
     {urls: ["<all_urls>"]}
 );
+/*
+function get_yt_title(youtubeid){
+    var xhr = new XMLHttpRequest();
+    var apikey = 0;
+    // https://www.googleapis.com/youtube/v3/videos?part=snippet&id={YOUTUBE_VIDEO_ID}&fields=items(id%2Csnippet)&key={YOUR_API_KEY}
+    xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + youtubeid);
+    xhr.timeout = 5000;
+    xhr.onreadystatechange = function (aEvt) {
+    if (xhr.readyState == 4) {
+        if(xhr.status == 200 && func) {
+            var resp = xhr.responseText;
+            console.log(resp);
 
-// function get_yt_title(youtubeid){
-//     var xhr = new XMLHttpRequest();
-//     var apikey = 0;
-//     // https://www.googleapis.com/youtube/v3/videos?part=snippet&id={YOUTUBE_VIDEO_ID}&fields=items(id%2Csnippet)&key={YOUR_API_KEY}
-//     xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + youtubeid);
-//     xhr.timeout = 5000;
-//     xhr.onreadystatechange = function (aEvt) {
-//     if (xhr.readyState == 4) {
-//         if(xhr.status == 200 && func) {
-//             var resp = xhr.responseText;
-//             console.log(resp);
+        }
+    };
+    xhr.send();
+    // return resp[]
+}
+*/
 
-//         }
-//     };
-//     xhr.send();
-//     // return resp[]
-// }
 /*
 Called when the item has been created, or when creation failed due to an error.
 We'll just log success/failure here.
@@ -196,45 +243,6 @@ function sendRequestToKODI2(data, hostData, func, note) {
     xhr.send();
 }
 
-function onGot(item) {
-  console.log(item);
-}
-
-
-
-function get_active_player(){
-    var xhr = new XMLHttpRequest();
-    // let getting = browser.storage.local.get();
-    // getting.then(onGot, onError);
-    // var hostData = get_host_2();
-   
-    var data = {"method": "Player.GetActivePlayers"};
-    data["jsonrpc"] = "2.0";
-    data["id"] = 1;
-    
-    // console.log(hostData);
-    console.log(JSON.stringify(data));
-    xhr.open("GET", "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc?request=" + JSON.stringify(data), true);    
-    xhr.timeout = 5000;
-    xhr.onreadystatechange = function (aEvt) {
-        if (xhr.readyState == 4) {
-            if(xhr.status == 200) {
-                var resp = xhr.responseText;
-                // parseJSON(resp);
-                console.log(resp);
-                var json = JSON.parse(resp);
-    
-                if (json["result"]){
-                    return json["result"]["playerid"];
-                }
-            } else {
-                notify("Error Sending request to KODI");
-                return 0;
-            }
-        }
-    };
-    xhr.send();
-}
 
 function parseJSON(resp) {
     console.log(resp);

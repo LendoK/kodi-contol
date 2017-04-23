@@ -130,7 +130,10 @@ function creat_media_list(mlist){
       }
       div.id = i;
       var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
+      var domain = document.createTextNode(mlist[i]["domain"])
       div.appendChild(textnode);
+      div.appendChild(document.createElement("br"));
+      div.appendChild(domain);
       node.appendChild(container);    
       list.appendChild(node);
     }
