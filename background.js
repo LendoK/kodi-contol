@@ -31,9 +31,12 @@ function check_media(filepath){
 
     if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
         var re = new RegExp(host);
+        var ping = new RegExp(/(ping.gif)+/i);
         if(re.test(filepath)){
-            console.log("request was to host: " + host);
+            console.log("invalid or request was to host: " + host);
             return false;
+        }else if(ping.test(filepath)){
+            return false;            
         }else{
             return true;
         }
@@ -79,9 +82,9 @@ function logURL(requestDetails) {
                 return;
             }
         }
+        singleObj['type'] = "youtube";
         singleObj['name'] = filename;
         singleObj['path'] = url;
-        singleObj['type'] = "youtube";
         singleObj['domain'] = extractRootDomain(url);
         // get_yt_title(matchVideo[1]);
 
@@ -194,6 +197,7 @@ function play_media(id, queue){
             }
             parseYoutubeURL(data,media_list[id]["path"]);
         }
+        media_list[id]["played"] = true;
     }else{
         notify("Error Nothing to play");
     }
