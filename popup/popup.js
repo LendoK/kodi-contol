@@ -173,6 +173,9 @@ function creat_media_list(mlist){
       }
       div.id = i;
       var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
+      if(mlist[i]["played"] == true){
+        div.style.color = "purple";
+      }
       var domain = document.createTextNode(mlist[i]["domain"])
       div.appendChild(textnode);
       div.appendChild(document.createElement("br"));

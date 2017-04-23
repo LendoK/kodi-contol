@@ -62,6 +62,7 @@ function logURL(requestDetails) {
         singleObj['path'] = url;
         singleObj['type'] = "video";
         singleObj['domain'] = extractRootDomain(url);
+        singleObj["played"] = false;
         media_list.push(singleObj);
         console.log("Loading: " + singleObj['name']);  
     }
@@ -86,6 +87,8 @@ function logURL(requestDetails) {
         singleObj['name'] = filename;
         singleObj['path'] = url;
         singleObj['domain'] = extractRootDomain(url);
+        singleObj["played"] = false;
+        
         // get_yt_title(matchVideo[1]);
 
         media_list.push(singleObj);
