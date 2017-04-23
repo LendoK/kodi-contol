@@ -6,7 +6,7 @@ html, body {
   margin: 3% auto;
   padding: 4px;
   text-align: center;
-  font-size: 1.0em;
+  font-size: 1.2em;
   cursor: pointer;
 }
 img {
@@ -64,7 +64,7 @@ ul {
   float: left;
   display: block;
   text-align: center;
-  font-size: 0.5em;
+  font-size: 0.7em;
   cursor: pointer;
   background-repeat:no-repeat;
   padding-left: 25px;

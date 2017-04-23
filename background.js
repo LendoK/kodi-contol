@@ -7,34 +7,35 @@ var youtube_pattern = "https://www.youtube.com/*";
 /* global media_list */
 media_list = [];
 var kodi_volume;
+var host;
+
+
+function get_settings(){
+    var ip2 = 0;
+    var gettingItem = browser.storage.local.get('host');
+    gettingItem.then((res) => {
+        host = res.host
+        console.log("getting host ip: " + host);
+        var re = new RegExp(ip);
+        ip2 = ip;
+    });
+}
+
 function check_media(filepath){  
     // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
     // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
         // |ts
 
-    var ip2 = 0;
-    var gettingItem = browser.storage.local.get('host');
-    gettingItem.then((res) => {
-        var ip = res.host
-        console.log("host: " + ip);
-        var re = new RegExp(ip);
-        ip2 = ip;
-    });
-    console.log("ip2: "+ ip2);
-    // if(re.test(filepath)){
-    //     return false;
-    // }
+
     if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
-        // if(/\(ping)+/i.test(filepath)){
-        //     console.log("failed"+ filepath);
-        //     return false;
-        // }else{
+        var re = new RegExp(host);
+        if(re.test(filepath)){
+            console.log("request was to host: " + host);
+            return false;
+        }else{
             return true;
-        // }
+        }
     }
-    // else{
-    //     return false;
-    // }
 }
 
 
@@ -118,12 +119,6 @@ function extractRootDomain(url) {
 }
 
 
-browser.webRequest.onBeforeRequest.addListener(
-  logURL,
-//   {urls:[pattern], types:["image"]},
-//   {urls:[pattern], types:["media"]}
-    {urls: ["<all_urls>"]}
-);
 /*
 function get_yt_title(youtubeid){
     var xhr = new XMLHttpRequest();
@@ -180,15 +175,6 @@ browser.contextMenus.create({
   contexts: ["image","video"]
 }, onCreated);
 
-browser.contextMenus.onClicked.addListener(function(info, tab) {
-  switch (info.menuItemId) {
-    case "send-kodi":
-      console.log("from context menu: " , info.srcUrl);
-      var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":info.srcUrl}},"id":1};
-      getHostData2(data,parseJSON);
-      break;
-  }
-});
 
 function play_media(id, queue){
     if(media_list[id]){
@@ -252,23 +238,6 @@ function parseJSON(resp) {
     else notify("Error recived from KODI");
 }
 
-
-
-function notify(message) {
-    browser.notifications.getAll(function(n) {
-        // clear all notifications
-        for(var i in n) {
-            browser.notifications.clear(i);
-        }
-        // create new notification
-        browser.notifications.create({
-            "type": "basic",
-            "iconUrl": browser.extension.getURL("icons/kodi96.png"),
-            "title": "KodiCommander",
-            "message": message
-        });
-    });
-}
 
 function idToURL(id, mediaid) {
     switch (id) {
@@ -420,11 +389,8 @@ function get_volume(resp){
 
 }
 
-browser.runtime.onMessage.addListener(handleMessage);
-function set_volume(volume){
-    var data = {"method": "Application.SetVolume", "params": {"volume" : parseInt(volume)}};
-    getHostData2(data, null, false);
-}
+
+//////////////////////////////////////////////////////messageing//////////////////////////////////////////////////
 
 
 function handleMessage(request, sender, sendResponse) {
@@ -449,4 +415,48 @@ function handleResponse(message) {
 
 function handleError(error) {
   console.log(`Error: ${error}`);
+}
+
+function notify(message) {
+    browser.notifications.getAll(function(n) {
+        // clear all notifications
+        for(var i in n) {
+            browser.notifications.clear(i);
+        }
+        // create new notification
+        browser.notifications.create({
+            "type": "basic",
+            "iconUrl": browser.extension.getURL("icons/kodi96.png"),
+            "title": "KodiCommander",
+            "message": message
+        });
+    });
+}
+
+
+////////////////////////////////////////////////////////////////listeners////////////////////////////////////////////////////
+
+window.addEventListener("load", get_settings, false);
+
+browser.webRequest.onBeforeRequest.addListener(
+  logURL,
+//   {urls:[pattern], types:["image"]},
+//   {urls:[pattern], types:["media"]}
+    {urls: ["<all_urls>"]}
+);
+
+browser.contextMenus.onClicked.addListener(function(info, tab) {
+  switch (info.menuItemId) {
+    case "send-kodi":
+      console.log("from context menu: " , info.srcUrl);
+      var data = {"jsonrpc":"2.0","method":"Player.Open","params":{"item":{"file":info.srcUrl}},"id":1};
+      getHostData2(data,parseJSON);
+      break;
+  }
+});
+
+browser.runtime.onMessage.addListener(handleMessage);
+function set_volume(volume){
+    var data = {"method": "Application.SetVolume", "params": {"volume" : parseInt(volume)}};
+    getHostData2(data, null, false);
 }
