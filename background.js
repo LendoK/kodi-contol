@@ -8,6 +8,7 @@ var youtube_pattern = "https://www.youtube.com/*";
 media_list = [];
 var kodi_volume;
 var host;
+var fullscreen = true;
 
 
 function get_settings(){
@@ -74,9 +75,9 @@ function logURL(requestDetails) {
         var singleObj = {};
         var i =0;
         if(matchVideo){
-            filename = matchVideo[0];
+            filename = matchVideo[1];
         }else{
-            filename = matchList[0];
+            filename = matchList[1];
         }
         for(i = 0; i < media_list.length; i++){
             if(media_list[i]['name'] == filename){
@@ -179,7 +180,7 @@ function onError(error) {
 var content;
 browser.contextMenus.create({
   id: "send-kodi",
-  title: browser.i18n.getMessage("contextSendToKodi", content),
+  title: browser.i18n.getMessage("contextSendToKodi"),
   contexts: ["image","video"]
 }, onCreated);
 
@@ -257,25 +258,24 @@ function send_text(){
 
 function idToURL(id, mediaid) {
     switch (id) {
-        case "b_play":
-            var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
-            getHostData2(data,parseJSON);
-            break;
         case "queue Media":
-            // var data = {"method": "Playlist.Add", "params": {"playlistid":1, "item": {"file": ""}}};
-            // getHostData2(data,parseJSON);
             play_media(mediaid,true);
             break;
         case "b_clearlist":
             var data = {"method": "Playlist.Clear", "params": {"playlistid":1}};
             getHostData2(data,parseJSON);
             break;
-        case "b_pause":
-            var data = {"method": "Input.ExecuteAction", "params": ["pause"]};
+         case "eye":
+            fullscreen = !fullscreen;
+            var data = {"method": "GUI.SetFullscreen", "params": [fullscreen]};
             getHostData2(data,parseJSON);
             break;
         case "b_stop":
             var data = {"method": "Input.ExecuteAction", "params": ["stop"]};
+            getHostData2(data,parseJSON);
+            break;
+        case "info":
+            var data = {"method": "Input.ShowOSD", "params": []};
             getHostData2(data,parseJSON);
             break;
         case "prev":
@@ -327,7 +327,7 @@ function idToURL(id, mediaid) {
             getHostData2(data,parseJSON);
             break;
         case "text":
-            // send_text();
+            send_text();
             break;
         case "playpause":
             var data = {"method": "Input.ExecuteAction", "params": ["pause"]};
@@ -337,6 +337,7 @@ function idToURL(id, mediaid) {
         case "playmedia":
             // var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
             // getURLfromTab(data);
+            idToURL("b_stop", 0); 
             play_media(mediaid,false);
             break;
         case "playing":
@@ -416,15 +417,18 @@ function handleMessage(request, sender, sendResponse) {
   if(request.selectedId){
       idToURL(request.selectedId, request.id);
       console.log("selectedID empfangengen");
-  }else if(request.volume){
-    set_volume(request.volume);
-    kodi_volume = request.volume;
-  }else if(request.onload){
-    console.log("Message from the Popup script: " +request.greeting);
-    var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
-    getHostData2(data, get_volume, true);
-    // sendResponse({response: "Response from background script", url: media_list[0]["name"], volume: kodi_volume});
-    sendResponse({response: "Response from background script", url: media_list, volume: kodi_volume});
+    }else if(request.text){
+        var data = {"jsonrpc": "2.0", "method": "Input.SendText", "params": [request.text], "id": 1};
+        getHostData2(data, parseJSON, false);
+
+    }else if(request.volume){
+        set_volume(request.volume);
+        kodi_volume = request.volume;
+    }else if(request.onload){
+        console.log("Message from the Popup script: " +request.greeting);
+        var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
+        getHostData2(data, get_volume, true);
+        sendResponse({response: "Response from background script", url: media_list, volume: kodi_volume});
   }
 }
 

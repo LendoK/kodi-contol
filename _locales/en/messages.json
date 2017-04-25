@@ -15,7 +15,7 @@
   },
 
    "contextSendToKodi": {
-    "message": "send $URL$ to kodi",
+    "message": "send to kodi",
     "description": "Title of context menu item that logs the selected text when clicked.",
     "placeholders": {
       "url" : {

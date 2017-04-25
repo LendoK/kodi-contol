@@ -15,9 +15,16 @@ function onError(error) {
 
 function startaction(action, id) {
   switch (action) {
+    case "text":
+    var string = document.getElementById("textfield");
+    console.log("string value:" + string.value);
+     browser.runtime.sendMessage({ "text": string.value});
+     break;
     case "Play/Pause":
-      console.log("start playing or pause");
      browser.runtime.sendMessage({"selectedId": "playpause"});
+     break;
+    case "eye":
+     browser.runtime.sendMessage({"selectedId": "eye"});
      break;
     case "Play Media":
       browser.runtime.sendMessage({"selectedId": "playmedia", "id": id});
@@ -61,9 +68,14 @@ function startaction(action, id) {
     case "context":
       browser.runtime.sendMessage({"selectedId": "context"});
       break;
+     case "info":
+      browser.runtime.sendMessage({"selectedId": "info"});
+      break;
     case "text":
       // var text = prompt("Send string to Kodi");
       // browser.runtime.sendMessage({"selectedId": "text"});
+      // var text = window.prompt("send string to Kodi", "Hello Kodi");
+      // console.log("der text:"+text);
       // var func => {var text = window.prompt("send string to Kodi", "Hello Kodi");};
       // browser.runtime.sendMessage({"selectedId": "context"});
       break;
@@ -101,7 +113,7 @@ function notifyBackgroundPage() {
 
 window.addEventListener("load", OnLoad, false);
 window.addEventListener("wheel", OnWheel, true);
-window.addEventListener("keydown", OnKeyDown, false);
+window.addEventListener("keydown", OnKeyDown, true);
 
 function OnKeyDown(e){
   var key = e.key; 
@@ -148,6 +160,7 @@ function OnWheel(e){
 function OnLoad() {
     console.log("POPUP: OnLoad");  
     notifyBackgroundPage();
+    // window.focus();
     
     // var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
 }
