@@ -3,8 +3,8 @@ html, body {
 }
 
 .button {
-  margin: 3% auto;
-  padding: 4px;
+  /*margin: 3% auto;*/
+  padding: 2px;
   text-align: center;
   font-size: 1.2em;
   cursor: pointer;
