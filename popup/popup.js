@@ -181,6 +181,7 @@ function creat_media_list(mlist){
       
       if(mlist[i]["type"] == "youtube"){
         div.className = "list item youtube";
+        // node.className = "list item youtube";
       }else{
         div.className = "list item mp4";
       }
