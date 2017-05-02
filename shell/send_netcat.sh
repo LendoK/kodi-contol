@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Required settings
-host=192.168.178.43
+host=192.168.178.28
 port=9090
 
 send_json()
@@ -23,7 +23,7 @@ input="$1"
 nc -lp 1234< "$input" &
 trap "kill $!" EXIT
 	
-url="tcp://192.168.178.39:1234"
+url="tcp://192.168.178.27:1234"
 
 
 # if [[ $input =~ \.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff)(\?.*)?$ ]]; then
