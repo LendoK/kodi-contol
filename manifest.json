@@ -9,7 +9,7 @@
   "description": "Sends Media to Kodi. Based on Youtube to Kodi by Regss",
 
   "icons": {
-    "96": "icons/kodi96.png" 
+    "96": "icons/colored_rotated.svg" 
   },
 
    "applications": {
@@ -31,7 +31,8 @@
   ],
 
    "browser_action": {
-    "default_icon": "icons/kodi96.png",
+    // "default_icon": "icons/kodi96.png",
+    "default_icon": "icons/colored_rotated.svg",
     "default_title": "kodicommander",
     "default_popup": "popup/popup.html"
   },

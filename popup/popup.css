@@ -124,6 +124,9 @@ li {
   overflow: auto;*/
   width: 240px;
 }
+/*.range {
+  width: 40px !important;
+}*/
 
 .quere {
   float: right;
