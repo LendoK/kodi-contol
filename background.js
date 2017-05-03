@@ -9,6 +9,7 @@ media_list = [];
 var kodi_volume;
 var host;
 var fullscreen = true;
+var unplayed = 0;
 
 
 function get_settings(){
@@ -66,6 +67,8 @@ function logURL(requestDetails) {
         singleObj["played"] = false;
         media_list.push(singleObj);
         console.log("Loading: " + singleObj['name']);  
+        unplayed +=1;
+        set_badgeText();
     }
     var matchVideo = videoPattern.exec(url);
     var matchList = playlistPattern.exec(url);
@@ -93,9 +96,26 @@ function logURL(requestDetails) {
         // get_yt_title(matchVideo[1]);
 
         media_list.push(singleObj);
+        unplayed +=1;        
+        set_badgeText();
+        
     }
     if(media_list.length > 10){
+        if (media_list[9]["palyed"]== false){
+            unplayed -=1;
+        }
         media_list.shift();
+
+        set_badgeText();        
+    }
+}
+
+function set_badgeText(){
+    // browser.browserAction.setBadgeBackgroundColor({color: "grey"});
+    if(unplayed > 0){
+        browser.browserAction.setBadgeText({text: (unplayed).toString()});
+    }else{
+        browser.browserAction.setBadgeText({text: ""});
     }
 }
 
@@ -201,7 +221,11 @@ function play_media(id, queue){
             }
             parseYoutubeURL(data,media_list[id]["path"]);
         }
-        media_list[id]["played"] = true;
+        if(media_list[id]["played"] == false){
+            unplayed -=1;
+            media_list[id]["played"] = true;
+            set_badgeText();        
+        }
     }else{
         notify("Error Nothing to play");
     }
