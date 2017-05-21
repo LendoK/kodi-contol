@@ -1,31 +1,25 @@
-/*
-Given the name of a beast, get the URL to the corresponding image.
-*/
+
 function onResponse(response) {
   console.log(`Received ${response}`);
-  // var x = document.getElementById("volume").value;
-
-  
 }
 
 function onError(error) {
   console.log(`Error: ${error}`);
 }
 
-
 function startaction(action, id) {
   switch (action) {
     case "text":
-    var string = document.getElementById("textfield");
-    console.log("string value:" + string.value);
-     browser.runtime.sendMessage({ "text": string.value});
-     break;
+      var string = document.getElementById("textfield");
+      console.log("string value:" + string.value);
+      browser.runtime.sendMessage({ "text": string.value});
+      break;
     case "Play/Pause":
-     browser.runtime.sendMessage({"selectedId": "playpause"});
-     break;
+      browser.runtime.sendMessage({"selectedId": "playpause"});
+      break;
     case "eye":
-     browser.runtime.sendMessage({"selectedId": "eye"});
-     break;
+      browser.runtime.sendMessage({"selectedId": "eye"});
+      break;
     case "Play Media":
       browser.runtime.sendMessage({"selectedId": "playmedia", "id": id});
       break;
@@ -72,12 +66,6 @@ function startaction(action, id) {
       browser.runtime.sendMessage({"selectedId": "info"});
       break;
     case "text":
-      // var text = prompt("Send string to Kodi");
-      // browser.runtime.sendMessage({"selectedId": "text"});
-      // var text = window.prompt("send string to Kodi", "Hello Kodi");
-      // console.log("der text:"+text);
-      // var func => {var text = window.prompt("send string to Kodi", "Hello Kodi");};
-      // browser.runtime.sendMessage({"selectedId": "context"});
       break;
     case "Send local file":
       openMyPage()
@@ -147,9 +135,7 @@ function OnKeyDown(e){
 }
 
 function OnWheel(e){
-  // var wheelEvent = new WheelEvent(null,null); 
   var delta = e.deltaY;
-  // console.log("maus rad: " +e.deltaY);
   if(delta < 0){
     startaction("up", 0)
   }else{
@@ -160,9 +146,6 @@ function OnWheel(e){
 function OnLoad() {
     console.log("POPUP: OnLoad");  
     notifyBackgroundPage();
-    // window.focus();
-    
-    // var data = {"jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["volume"]}, "id": 1};
 }
 
 function creat_media_list(mlist){
@@ -177,11 +160,9 @@ function creat_media_list(mlist){
       quere.id = i;
       quere.className ="list item quere";
       container.appendChild(quere);
-      // div.appendChild(quere);
       
       if(mlist[i]["type"] == "youtube"){
         div.className = "list item youtube";
-        // node.className = "list item youtube";
       }else{
         div.className = "list item mp4";
       }

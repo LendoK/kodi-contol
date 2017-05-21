@@ -1,7 +1,6 @@
 var pattern = "<all_urls>";
 var videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
 var playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
-
 var youtube_pattern = "https://www.youtube.com/*";
 
 /* global media_list */
@@ -26,11 +25,6 @@ function get_settings(){
 }
 
 function check_media(filepath){  
-    // mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a|aac|ogg|pls|jpg|png|gif|jpeg|tiff
-    // if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)$/i.test(filepath)){
-        // |ts
-
-
     if ( /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)){
         var re = new RegExp(host);
         var ping = new RegExp(/(ping.gif)+/i);
@@ -47,11 +41,8 @@ function check_media(filepath){
 
 
 function logURL(requestDetails) {
-    // console.log(requestDetails.url);
     var url = requestDetails.url;
     if (check_media(url)){
-        // media_list = [];
-        // console.log("Loading: " + requestDetails.url);
         var filename = url.replace(/^.*[\\\/]/, '');
         var singleObj = {};
         var i =0;
@@ -92,9 +83,6 @@ function logURL(requestDetails) {
         singleObj['path'] = url;
         singleObj['domain'] = extractRootDomain(url);
         singleObj["played"] = false;
-        
-        // get_yt_title(matchVideo[1]);
-
         media_list.push(singleObj);
         unplayed +=1;        
         set_badgeText();
@@ -111,7 +99,6 @@ function logURL(requestDetails) {
 }
 
 function set_badgeText(){
-    // browser.browserAction.setBadgeBackgroundColor({color: "grey"});
     if(unplayed > 0){
         browser.browserAction.setBadgeText({text: (unplayed).toString()});
     }else{
@@ -147,26 +134,6 @@ function extractRootDomain(url) {
     return domain;
 }
 
-
-/*
-function get_yt_title(youtubeid){
-    var xhr = new XMLHttpRequest();
-    var apikey = 0;
-    // https://www.googleapis.com/youtube/v3/videos?part=snippet&id={YOUTUBE_VIDEO_ID}&fields=items(id%2Csnippet)&key={YOUR_API_KEY}
-    xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + youtubeid);
-    xhr.timeout = 5000;
-    xhr.onreadystatechange = function (aEvt) {
-    if (xhr.readyState == 4) {
-        if(xhr.status == 200 && func) {
-            var resp = xhr.responseText;
-            console.log(resp);
-
-        }
-    };
-    xhr.send();
-    // return resp[]
-}
-*/
 
 /*
 Called when the item has been created, or when creation failed due to an error.
@@ -487,8 +454,6 @@ window.addEventListener("load", get_settings, false);
 
 browser.webRequest.onBeforeRequest.addListener(
   logURL,
-//   {urls:[pattern], types:["image"]},
-//   {urls:[pattern], types:["media"]}
     {urls: ["<all_urls>"]}
 );
 
