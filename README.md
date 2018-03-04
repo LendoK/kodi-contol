@@ -17,5 +17,5 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 * USER: OSMC //example
 * PASS: OSMC // not required
 
-##Licence
+## Licence
 GPL 3.0
