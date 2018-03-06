@@ -14,8 +14,8 @@
    height="256"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.47 r22583"
-   sodipodi:docname="youtube.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
+   sodipodi:docname="Youtube.svg"
    version="1.0"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
   <defs
@@ -55,7 +55,7 @@
      inkscape:cy="64.459739"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     inkscape:window-width="685"
+     inkscape:window-width="866"
      inkscape:window-height="682"
      inkscape:window-x="1"
      inkscape:window-y="298"
@@ -126,7 +126,7 @@
        style="opacity:0.83261803;fill:url(#linearGradient2449);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.87500000000000000;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.87500000000000000, 1.75000000000000000;stroke-dashoffset:0;stroke-opacity:1" />
     <text
        xml:space="preserve"
-       style="font-size:90.90512848px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;fill-opacity:1;stroke:none"
        x="493.00162"
        y="374.78995"
        id="text2900"
@@ -135,7 +135,7 @@
          x="493.00162"
          y="374.78995"
          id="tspan2904"
-         style="font-weight:bold;-inkscape-font-specification:Bitstream Vera Sans Bold">You</tspan></text>
+         style="font-weight:bold;font-size:90.90512848px;line-height:1.25;-inkscape-font-specification:'Bitstream Vera Sans Bold'">You</tspan></text>
     <rect
        style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
        id="rect3708"
@@ -147,7 +147,7 @@
        ry="35.487503" />
     <text
        xml:space="preserve"
-       style="font-size:86.35299683px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;fill-opacity:1;stroke:none"
        x="441.62125"
        y="487.07681"
        id="text2908"
@@ -155,6 +155,7 @@
          sodipodi:role="line"
          id="tspan2910"
          x="441.62125"
-         y="487.07681">Tube</tspan></text>
+         y="487.07681"
+         style="font-size:86.35299683px;line-height:1.25">Tube</tspan></text>
   </g>
 </svg>

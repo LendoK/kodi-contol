@@ -43,6 +43,9 @@ img:hover {
   width: 180px;
 }
 
+.audio{
+  border: 1px;
+}
 #text{
   margin: -5px;
 }
@@ -62,6 +65,7 @@ ul {
 .range:hover {
  background-color: #E5F2F2;
 }
+
 .item {
   margin-left: 0;
   margin-right: 0;
