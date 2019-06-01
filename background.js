@@ -210,8 +210,11 @@ function sendRequestToKODI2(data, hostData, func, note) {
     var xhr = new XMLHttpRequest();
     data["jsonrpc"] = "2.0";
     data["id"] = 1;
-
-    xhr.open("GET", "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc?request=" + JSON.stringify(data), true);
+    request = "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc";
+    // console.log("params: ", request)
+    // console.log("data: ", data)
+    xhr.open("POST", request, true);
+    xhr.setRequestHeader("Content-type", "application/json");
     xhr.timeout = 5000;
     xhr.onreadystatechange = function (aEvt) {
         if (note) {
@@ -221,11 +224,13 @@ function sendRequestToKODI2(data, hostData, func, note) {
                     func(resp);
                 } else {
                     notify("Error Sending request to KODI");
+                    console.log("response: ", resp)
+
                 }
             }
         }
     };
-    xhr.send();
+    xhr.send(JSON.stringify(data));
 }
 
 function parseJSON(resp) {
@@ -234,6 +239,7 @@ function parseJSON(resp) {
         notify("Sent to KODI");
     }
     else {
+        console.log(resp)
         notify("Error recived from KODI");
     }
 }
@@ -372,7 +378,9 @@ function parseYoutubeURL(data, url) {
         // notify("This is not youtube URL, trying something else");
         play_media();
     } else {
-        data["params"]["item"]["file"] = "plugin%3A%2F%2Fplugin.video.youtube%2Fplay%2F%3F" + encodeQueryData(yt_data)
+        
+        // data["params"]["item"]["file"] = "plugin%3A%2F%2Fplugin.video.youtube%2Fplay%2F%3F" + encodeQueryData(yt_data)
+        data["params"]["item"]["file"] = "plugin://plugin.video.youtube/play/?video_id="+ yt_data['video_id']
         getHostData2(data, parseJSON);
     }
 }
