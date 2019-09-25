@@ -1,4 +1,4 @@
-# Kodi-Control 1.0
+# Kodi-Control
 
 ## About
 Firefox Extension to control Kodi remotely. Sending videos, music and pictures to Kodi.
