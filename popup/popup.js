@@ -76,7 +76,7 @@ function startaction(action, id) {
 function handleResponse(message) {
     if (message.url) {
         media = message.url;
-        creat_media_list(message.url);
+        getDomainMediaList(message.url);
     }
     if (message.volume) {
         document.getElementById("volume").value = message.volume;
@@ -142,35 +142,78 @@ function OnLoad() {
     notifyBackgroundPage();
 }
 
-function creat_media_list(mlist) {
-    var list = document.getElementById("media_list");
-    for (var i = 0; i < mlist.length; i++) {
-        var container = document.createElement("div");
-        var node = document.createElement("LI");                 // Create a <li> node
-        var div = document.createElement("div");
-        container.appendChild(div);
-        var quere = document.createElement("div");
-        quere.id = i;
-        quere.className = "list item quere";
-        container.appendChild(quere);
+// background helper functions
+// TODO single implementation
+function extractHostname(url) {
+    var hostname;
+    //find & remove protocol (http, ftp, etc.) and get the hostname
+    if (url.indexOf("://") > -1) {
+        hostname = url.split('/')[2];
+    }
+    else {
+        hostname = url.split('/')[0];
+    }
 
-        if (mlist[i]["type"] == "youtube") {
-            div.className = "list item youtube";
-        } else {
-            div.className = "list item mp4";
+    //find & remove port number
+    hostname = hostname.split(':')[0];
+
+    return hostname;
+}
+
+function extractRootDomain(url) {
+    var domain = extractHostname(url),
+        splitArr = domain.split('.'),
+        arrLen = splitArr.length;
+
+    //extracting the root domain here
+    if (arrLen > 2) {
+        domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+    }
+    return domain;
+}
+
+function getDomainMediaList(mlist){
+    // get current domain
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+        var domain = extractRootDomain(tabs[0].url);
+        console.log(domain);
+        creat_media_list(domain, mlist);
+    })
+}
+
+
+function creat_media_list(domain, mlist) {
+    var list = document.getElementById("media_list");
+    for (var i = mlist.length -1; i >= 0 ; i--) {
+        if(domain == mlist[i]["domain"]){
+            var container = document.createElement("div");
+            var node = document.createElement("LI");                 // Create a <li> node
+            var div = document.createElement("div");
+            container.appendChild(div);
+            var quere = document.createElement("div");
+            quere.id = i;
+            quere.className = "list item quere";
+            container.appendChild(quere);
+
+            if (mlist[i]["type"] == "youtube") {
+                div.className = "list item youtube";
+            } else {
+                div.className = "list item mp4";
+            }
+            div.id = i;
+            div.title = mlist[i]["name"];
+            var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
+            if (mlist[i]["played"] == true) {
+                div.style.color = "purple";
+            }
+            var domain_text = document.createTextNode(mlist[i]["domain"])
+            div.appendChild(textnode);
+            div.appendChild(document.createElement("br"));
+            div.appendChild(domain_text);
+            node.appendChild(container);
+            list.appendChild(node);
         }
-        div.id = i;
-        div.title = mlist[i]["name"];
-        var textnode = document.createTextNode(mlist[i]["name"]);      // Create a text node
-        if (mlist[i]["played"] == true) {
-            div.style.color = "purple";
-        }
-        var domain = document.createTextNode(mlist[i]["domain"])
-        div.appendChild(textnode);
-        div.appendChild(document.createElement("br"));
-        div.appendChild(domain);
-        node.appendChild(container);
-        list.appendChild(node);
     }
 
 }

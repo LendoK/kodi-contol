@@ -378,7 +378,7 @@ function parseYoutubeURL(data, url) {
         // notify("This is not youtube URL, trying something else");
         play_media();
     } else {
-        
+
         // data["params"]["item"]["file"] = "plugin%3A%2F%2Fplugin.video.youtube%2Fplay%2F%3F" + encodeQueryData(yt_data)
         data["params"]["item"]["file"] = "plugin://plugin.video.youtube/play/?video_id="+ yt_data['video_id']
         getHostData2(data, parseJSON);
@@ -419,7 +419,6 @@ function handleMessage(request, sender, sendResponse) {
         set_volume(request.volume);
         kodi_volume = request.volume;
     } else if (request.onload) {
-        // console.log("Message from the Popup script: " + request.greeting);
         var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume"] }, "id": 1 };
         getHostData2(data, get_volume, true);
         sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume });
