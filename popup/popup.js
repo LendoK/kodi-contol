@@ -177,7 +177,6 @@ function getDomainMediaList(mlist){
     browser.tabs.query({currentWindow: true, active: true})
     .then((tabs) => {
         var domain = extractRootDomain(tabs[0].url);
-        console.log(domain);
         creat_media_list(domain, mlist);
     })
 }
