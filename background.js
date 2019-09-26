@@ -87,7 +87,7 @@ function logURL(requestDetails) {
 
     }
     if (media_list.length > 10) {
-        if (media_list[9]["palyed"] == false) {
+        if (media_list[9].played == false) {
             unplayed -= 1;
         }
         media_list.shift();
