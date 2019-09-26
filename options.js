@@ -7,22 +7,56 @@ document.getElementById("test_button").addEventListener("click", function(e){
     testConnection(e);
 });
 
+function checkInputFields(){
+    valid = true;
+    var host = document.querySelector("#host").value.replace("http://", "");
+    host_pattern = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b$/;
+    var matchHost = host_pattern.exec(host);
+    if(!matchHost){
+        document.getElementById("host_error").innerHTML= "  invalid IP address";
+        valid = false;
+    }else{
+        document.getElementById("host_error").innerHTML= "";
+    }
+
+    var port = document.querySelector("#port").value;
+    port_pattern = /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
+    var matchPort = port_pattern.exec(port);
+    if(!matchPort){
+        document.getElementById("port_error").innerHTML= "  invalid port";
+        valid = false;
+    }else{
+        document.getElementById("port_error").innerHTML= "";
+    }
+
+    var user = document.querySelector("#user").value;
+    user_pattern = /^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/;
+    var matchUser = user_pattern.exec(user);
+    if(!matchUser){
+        document.getElementById("user_error").innerHTML= "  invalid username";
+        valid = false;
+    }else{
+        document.getElementById("user_error").innerHTML= "";
+    }
+    return valid;
+}
+
 function testConnection(e) {
+    if(!checkInputFields()) return;
     e.target.innerHTML = "Checking...";
     e.target.style.backgroundColor = "#dee06d";
-    
     var host = document.querySelector("#host").value.replace("http://", "");
     var port = document.querySelector("#port").value;
     var user = document.querySelector("#user").value;
     var pass = document.querySelector("#pass").value;
-    
+
     var xhr = new XMLHttpRequest();
-    
+
     var data = {};
     data["method"] = "JSONRPC.Version";
     data["jsonrpc"] = "2.0";
     data["id"] = 1;
-    
+
     console.log(JSON.stringify(data));
     xhr.open("GET", "http://" + encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@" + encodeURIComponent(host) + ":" + encodeURIComponent(port) + "/jsonrpc?request=" + JSON.stringify(data), true);
     xhr.timeout = 5000;
@@ -37,7 +71,7 @@ function testConnection(e) {
                 buttonCheckERROR(e);
             }
         }
-        
+
         window.setTimeout(function() {
             e.target.innerHTML = "Test Connection";
             e.target.style.backgroundColor = "#eee";
@@ -53,10 +87,10 @@ function saveOptions(e) {
         user: document.querySelector("#user").value,
         pass: document.querySelector("#pass").value
     });
-    
+
     e.target.innerHTML = "Saved";
     e.target.style.backgroundColor = "#6de075";
-    
+
     window.setTimeout(function() {
         e.target.innerHTML = "Save";
         e.target.style.backgroundColor = "#eee";
