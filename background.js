@@ -10,17 +10,9 @@ var host;
 var fullscreen = true;
 var unplayed = 0;
 
-
-function get_settings() {
-    var ip2 = 0;
-    var gettingItem = browser.storage.local.get('host');
-    gettingItem.then((res) => {
-        host = res.host
-        var re = new RegExp(ip);
-        ip2 = ip;
-    });
-    var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume"] }, "id": 1 };
-    getHostData2(data, get_volume, true);
+function get_volume(resp) {
+    var json = JSON.parse(resp);
+    kodi_volume = json["result"]["volume"];
 }
 
 function check_media(filepath) {
@@ -111,62 +103,6 @@ function set_badgeText() {
     }
 }
 
-function extractHostname(url) {
-    var hostname;
-    //find & remove protocol (http, ftp, etc.) and get the hostname
-    if (url.indexOf("://") > -1) {
-        hostname = url.split('/')[2];
-    }
-    else {
-        hostname = url.split('/')[0];
-    }
-
-    //find & remove port number
-    hostname = hostname.split(':')[0];
-
-    return hostname;
-}
-
-function extractRootDomain(url) {
-    var domain = extractHostname(url),
-        splitArr = domain.split('.'),
-        arrLen = splitArr.length;
-
-    //extracting the root domain here
-    if (arrLen > 2) {
-        domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
-    }
-    return domain;
-}
-
-/*
-Called when the item has been created, or when creation failed due to an error.
-We'll just log success/failure here.
-*/
-function onCreated(n) {
-    if (browser.runtime.lastError) {
-        console.log(`Error: ${browser.runtime.lastError}`);
-    } else {
-        // console.log("Item created successfully");
-    }
-}
-
-/*
-Called when the item has been removed.
-We'll just log success here.
-*/
-function onRemoved() {
-    console.log("Item removed successfully");
-}
-
-/*
-Called when there was an error.
-We'll just log the error here.
-*/
-function onError(error) {
-    console.log(`Error: ${error}`);
-}
-
 var content;
 browser.contextMenus.create({
     id: "send-kodi",
@@ -181,7 +117,7 @@ function play_media(id, queue) {
             if (queue) {
                 data = { "method": "Playlist.Add", "params": { "playlistid": 1, "item": { "file": media_list[id]["path"] } } };
             }
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
         } if (media_list[id]["type"] == "youtube") {
             var data = { "method": "Player.Open", "params": { "item": { "file": "" } } };
             if (queue) {
@@ -199,20 +135,18 @@ function play_media(id, queue) {
     }
 }
 
-function getHostData2(data, func, note) {
+function getHostData(data, func, note) {
     var getting = browser.storage.local.get(null, function (result) {
         var hostData = result;
-        sendRequestToKODI2(data, hostData, func, note);
+        sendRequestToKODI(data, hostData, func, note);
     });
 }
 
-function sendRequestToKODI2(data, hostData, func, note) {
+function sendRequestToKODI(data, hostData, func, note) {
     var xhr = new XMLHttpRequest();
     data["jsonrpc"] = "2.0";
     data["id"] = 1;
     request = "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc";
-    // console.log("params: ", request)
-    // console.log("data: ", data)
     xhr.open("POST", request, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.timeout = 5000;
@@ -220,12 +154,14 @@ function sendRequestToKODI2(data, hostData, func, note) {
         if (note) {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200 && func) {
+                    // browser.browserAction.enable();
                     var resp = xhr.responseText;
+                    console.log("response: ", resp)
                     func(resp);
                 } else {
-                    notify("Error Sending request to KODI");
+                    // notify("Error Sending request to KODI");
+                    // browser.browserAction.disable();
                     console.log("response: ", resp)
-
                 }
             }
         }
@@ -255,107 +191,86 @@ function idToURL(id, mediaid) {
             break;
         case "b_clearlist":
             var data = { "method": "Playlist.Clear", "params": { "playlistid": 1 } };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "eye":
             fullscreen = !fullscreen;
             var data = { "method": "GUI.SetFullscreen", "params": [fullscreen] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "b_stop":
             var data = { "method": "Input.ExecuteAction", "params": ["stop"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "info":
             var data = { "method": "Input.ShowOSD", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "prev":
             var data = { "method": "Input.ExecuteAction", "params": ["skipprevious"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "next":
             var data = { "method": "Input.ExecuteAction", "params": ["skipnext"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "b_volmute":
             var data = { "method": "Input.ExecuteAction", "params": ["mute"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "b_volup":
             var data = { "method": "Input.ExecuteAction", "params": ["volumeup"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "b_voldown":
             var data = { "method": "Input.ExecuteAction", "params": ["volumedown"] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "up":
             var data = { "method": "Input.Up", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "down":
             var data = { "method": "Input.Down", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "left":
             var data = { "method": "Input.Left", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "right":
             var data = { "method": "Input.Right", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "ok":
             var data = { "method": "Input.Select", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "back":
             var data = { "method": "Input.Back", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "context":
             var data = { "method": "Input.ContextMenu", "params": [] };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "text":
             send_text();
             break;
         case "playpause":
             var data = { "method": "Input.ExecuteAction", "params": ["pause"] };
-            // var data = {"jsonrpc":"2.0","method": "Player.PlayPause", "params": { "playerid": get_active_player() },"id":1};
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
         case "playmedia":
-            // var data = {"method": "Player.Open", "params": {"item": {"file": ""}}};
-            // getURLfromTab(data);
             idToURL("b_stop", 0);
             play_media(mediaid, false);
             break;
         case "playing":
-            getHostData2();
+            getHostData();
             // play_media();
             break;
             window.close();
     }
-}
-
-function encodeQueryData(data) {
-    var k;
-    var ret = [];
-    for (k in data) {
-        if (data[k] != '') {
-            ret.push((k) + '=' + data[k]);
-        }
-    }
-    return escape(ret.join('&'));
-}
-
-function getURLfromTab(data) {
-    var gettingActiveTab = browser.tabs.query({ active: true, currentWindow: true });
-    gettingActiveTab.then((tabs) => {
-        parseYoutubeURL(data, tabs[0].url);
-    });
 }
 
 function parseYoutubeURL(data, url) {
@@ -379,58 +294,32 @@ function parseYoutubeURL(data, url) {
         play_media();
     } else {
 
-        // data["params"]["item"]["file"] = "plugin%3A%2F%2Fplugin.video.youtube%2Fplay%2F%3F" + encodeQueryData(yt_data)
         data["params"]["item"]["file"] = "plugin://plugin.video.youtube/play/?video_id="+ yt_data['video_id']
-        getHostData2(data, parseJSON);
+        getHostData(data, parseJSON);
     }
 }
-
-function encodeQueryData(data) {
-    var k;
-    var ret = [];
-    for (k in data) {
-        if (data[k] != '') {
-            ret.push((k) + '=' + data[k]);
-        }
-    }
-    return escape(ret.join('&'));
-}
-
-function get_volume(resp) {
-    var json = JSON.parse(resp);
-    // console.log(json["result"]);
-    kodi_volume = json["result"]["volume"];
-
-}
-
-
 //////////////////////////////////////////////////////messageing//////////////////////////////////////////////////
 
 
 function handleMessage(request, sender, sendResponse) {
     if (request.selectedId) {
         idToURL(request.selectedId, request.id);
-        // console.log("selectedID empfangengen");
     } else if (request.text) {
         var data = { "jsonrpc": "2.0", "method": "Input.SendText", "params": [request.text], "id": 1 };
-        getHostData2(data, parseJSON, false);
+        getHostData(data, parseJSON, false);
 
     } else if (request.volume) {
         set_volume(request.volume);
         kodi_volume = request.volume;
     } else if (request.onload) {
         var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume"] }, "id": 1 };
-        getHostData2(data, get_volume, true);
+        getHostData(data, get_volume, true);
         sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume });
     }
 }
 
 function handleResponse(message) {
     console.log(`Message from the background script:  ${message.response}`);
-}
-
-function handleError(error) {
-    console.log(`Error: ${error}`);
 }
 
 function notify(message) {
@@ -449,28 +338,28 @@ function notify(message) {
     });
 }
 
+function set_volume(volume) {
+    var data = { "method": "Application.SetVolume", "params": { "volume": parseInt(volume) } };
+    getHostData(data, null, false);
+}
 
 ////////////////////////////////////////////////////////////////listeners////////////////////////////////////////////////////
 
-window.addEventListener("load", get_settings, false);
 
 browser.webRequest.onBeforeRequest.addListener(
     logURL,
     { urls: ["<all_urls>"] }
-);
+    );
 
 browser.contextMenus.onClicked.addListener(function (info, tab) {
     switch (info.menuItemId) {
         case "send-kodi":
             // console.log("from context menu: ", info.srcUrl);
             var data = { "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "file": info.srcUrl } }, "id": 1 };
-            getHostData2(data, parseJSON);
+            getHostData(data, parseJSON);
             break;
-    }
-});
+        }
+    });
+
 
 browser.runtime.onMessage.addListener(handleMessage);
-function set_volume(volume) {
-    var data = { "method": "Application.SetVolume", "params": { "volume": parseInt(volume) } };
-    getHostData2(data, null, false);
-}

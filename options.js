@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", restoreOptions);
+
 document.getElementById("save_button").addEventListener("click", function(e){
     saveOptions(e);
 });
@@ -56,8 +56,6 @@ function testConnection(e) {
     data["method"] = "JSONRPC.Version";
     data["jsonrpc"] = "2.0";
     data["id"] = 1;
-
-    console.log(JSON.stringify(data));
     xhr.open("GET", "http://" + encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@" + encodeURIComponent(host) + ":" + encodeURIComponent(port) + "/jsonrpc?request=" + JSON.stringify(data), true);
     xhr.timeout = 5000;
     xhr.onreadystatechange = function (aEvt) {
@@ -115,3 +113,5 @@ function buttonCheckERROR(e) {
     e.target.innerHTML = "Error";
     e.target.style.backgroundColor = "#ff4949";
 }
+
+document.addEventListener("DOMContentLoaded", restoreOptions);

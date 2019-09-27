@@ -1,12 +1,4 @@
 
-function onResponse(response) {
-    console.log(`Received ${response}`);
-}
-
-function onError(error) {
-    console.log(`Error: ${error}`);
-}
-
 function startaction(action, id) {
     switch (action) {
         case "text":
@@ -73,7 +65,7 @@ function startaction(action, id) {
 }
 
 
-function handleResponse(message) {
+function handleResponsePO(message) {
     if (message.url) {
         media = message.url;
         getDomainMediaList(message.url);
@@ -83,21 +75,12 @@ function handleResponse(message) {
     }
 }
 
-function handleError(error) {
-    console.log(`Error: ${error}`);
-}
-
 function notifyBackgroundPage() {
     var sending = browser.runtime.sendMessage({
         greeting: "Greeting from the popup script", "onload": true
     });
-    sending.then(handleResponse, handleError);
+    sending.then(handleResponsePO, handleError);
 }
-
-
-window.addEventListener("load", OnLoad, false);
-window.addEventListener("wheel", OnWheel, true);
-window.addEventListener("keydown", OnKeyDown, true);
 
 function OnKeyDown(e) {
     var key = e.key;
@@ -142,47 +125,17 @@ function OnLoad() {
     notifyBackgroundPage();
 }
 
-// background helper functions
-// TODO single implementation
-function extractHostname(url) {
-    var hostname;
-    //find & remove protocol (http, ftp, etc.) and get the hostname
-    if (url.indexOf("://") > -1) {
-        hostname = url.split('/')[2];
-    }
-    else {
-        hostname = url.split('/')[0];
-    }
-
-    //find & remove port number
-    hostname = hostname.split(':')[0];
-
-    return hostname;
-}
-
-function extractRootDomain(url) {
-    var domain = extractHostname(url),
-        splitArr = domain.split('.'),
-        arrLen = splitArr.length;
-
-    //extracting the root domain here
-    if (arrLen > 2) {
-        domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
-    }
-    return domain;
-}
-
 function getDomainMediaList(mlist){
     // get current domain
     browser.tabs.query({currentWindow: true, active: true})
     .then((tabs) => {
         var domain = extractRootDomain(tabs[0].url);
-        creat_media_list(domain, mlist);
+        create_media_list(domain, mlist);
     })
 }
 
 
-function creat_media_list(domain, mlist) {
+function create_media_list(domain, mlist) {
     var list = document.getElementById("media_list");
     for (var i = mlist.length -1; i >= 0 ; i--) {
         if(domain == mlist[i]["domain"]){
@@ -217,6 +170,11 @@ function creat_media_list(domain, mlist) {
 
 }
 
+function openMyPage() {
+    browser.tabs.create({
+        "url": "/local_files/local_files.html"
+    });
+}
 
 document.addEventListener("click", (e) => {
     var id = 0;
@@ -235,13 +193,12 @@ document.addEventListener("click", (e) => {
     startaction(action, id);
 });
 
+window.addEventListener("load", OnLoad, false);
+window.addEventListener("wheel", OnWheel, true);
+window.addEventListener("keydown", OnKeyDown, true);
+
 document.addEventListener("input", function (e) {
     browser.runtime.sendMessage({ "volume": e.target.value });
 });
 
-function openMyPage() {
-    browser.tabs.create({
-        "url": "/local_files/local_files.html"
-    });
-}
 

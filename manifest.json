@@ -39,7 +39,7 @@
   },
 
   "background": {
-      "scripts": ["background.js"]
+      "scripts": ["global.js", "background.js"]
   },
 
   "content_scripts": [
