@@ -66,12 +66,15 @@ function startaction(action, id) {
 
 
 function handleResponsePO(message) {
-    if (message.url) {
+    if ("url" in message) {
         media = message.url;
         getDomainMediaList(message.url);
     }
-    if (message.volume) {
+    if ("volume" in message) {
         document.getElementById("volume").value = message.volume;
+    }
+    if ("muted" in message) {
+        document.getElementById("mute").src = message.muted ? "/icons/mute.svg" : "/icons/audio.svg";
     }
 }
 

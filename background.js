@@ -6,6 +6,7 @@ var youtube_pattern = "https://www.youtube.com/*";
 /* global media_list */
 media_list = [];
 var kodi_volume;
+var kodi_mute
 var host;
 var fullscreen = true;
 var unplayed = 0;
@@ -13,6 +14,22 @@ var unplayed = 0;
 function get_volume(resp) {
     var json = JSON.parse(resp);
     kodi_volume = json["result"]["volume"];
+}
+
+function getKodiState(){
+    var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume", "muted"] }, "id": 1 };
+        // getHostData(data, get_volume, true);
+    getHostData(data, function(resp){var json = JSON.parse(resp); kodi_volume = json["result"]["volume"]; kodi_mute = json["result"]["muted"];}, true);
+}
+
+function getAPI(){
+    var data = { "jsonrpc": "2.0", "method": "JSONRPC.Introspect", "id": 1 };
+    getHostData(data, parseJSON, true);
+}
+
+function set_volume(volume) {
+    var data = { "method": "Application.SetVolume", "params": { "volume": parseInt(volume) } };
+    getHostData(data, null, false);
 }
 
 function check_media(filepath) {
@@ -103,7 +120,6 @@ function set_badgeText() {
     }
 }
 
-var content;
 browser.contextMenus.create({
     id: "send-kodi",
     title: browser.i18n.getMessage("contextSendToKodi"),
@@ -312,9 +328,10 @@ function handleMessage(request, sender, sendResponse) {
         set_volume(request.volume);
         kodi_volume = request.volume;
     } else if (request.onload) {
-        var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume"] }, "id": 1 };
-        getHostData(data, get_volume, true);
-        sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume });
+        // var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume", "muted"] }, "id": 1 };
+        // getHostData(data, get_volume, true);
+        getKodiState();
+        sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume, muted: kodi_mute});
     }
 }
 
@@ -338,10 +355,6 @@ function notify(message) {
     });
 }
 
-function set_volume(volume) {
-    var data = { "method": "Application.SetVolume", "params": { "volume": parseInt(volume) } };
-    getHostData(data, null, false);
-}
 
 ////////////////////////////////////////////////////////////////listeners////////////////////////////////////////////////////
 
