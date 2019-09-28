@@ -63,7 +63,6 @@ function startaction(action, id) {
 
 
 function handleResponsePO(message) {
-    console.log("handle response");
     if ("url" in message) {
         media = message.url;
         getDomainMediaList(message.url);
@@ -76,10 +75,8 @@ function handleResponsePO(message) {
         // image.id = "mute";
         if(message.muted){
             image.src = "/icons/mute.svg";
-            console.log("set mute");
         }else{
             image.src = "/icons/audio.svg";
-            console.log("set audio");
         }
     }
 }

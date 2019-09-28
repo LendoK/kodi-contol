@@ -65,6 +65,19 @@ function check_media(filepath) {
     }
 }
 
+function getUnplayedPerPage(){
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+        var domain = extractRootDomain(tabs[0].url);
+        unplayed = 0;
+        for(var i = 0; i < media_list.length; i++){
+            if(domain == media_list[i]["domain"] && !media_list[i].played){
+                unplayed++;
+            }
+        }
+        set_badgeText();
+    })
+}
 
 function logURL(requestDetails) {
     var url = requestDetails.url;
@@ -370,5 +383,8 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
         }
     });
 
-
 browser.runtime.onMessage.addListener(handleMessage);
+
+browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    getUnplayedPerPage();
+});
