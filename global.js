@@ -61,3 +61,61 @@ function onResponse(response) {
 function handleError(error) {
     console.log(`Error: ${error}`);
 }
+
+
+//reqest function to submit json data
+function sendRequest(data, hostData, func, note, error_func, final_func, methode) {
+    var xhr = new XMLHttpRequest();
+    data["jsonrpc"] = "2.0";
+    data["id"] = 1;
+    if (typeof(methode)==='undefined') methode = "POST";
+    if(methode == "POST"){
+        request = "http://" + encodeURIComponent(hostData.user)
+            + ":" + encodeURIComponent(hostData.pass)
+            + "@" + encodeURIComponent(hostData.host)
+            + ":" + encodeURIComponent(hostData.port)
+            + "/jsonrpc";
+    }else{
+        request = "http://" + encodeURIComponent(hostData.user)
+            + ":" + encodeURIComponent(hostData.pass)
+            + "@" + encodeURIComponent(hostData.host)
+            + ":" + encodeURIComponent(hostData.port)
+            + "/jsonrpc?request="
+            + JSON.stringify(data);
+    }
+    xhr.open(methode, request, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.timeout = 5000;
+    xhr.onreadystatechange = function (aEvt) {
+        if (note) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200 && func) {
+                    var resp = xhr.responseText;
+                    func(resp);
+                } else {
+                    if(error_func){
+                        error_func();
+                    }
+                }
+            }
+            if(final_func){
+                final_func();
+            }
+        }
+    };
+    if(methode == "POST"){
+        xhr.send(JSON.stringify(data));
+    }else{
+        xhr.send();
+    }
+}
+
+function enableBrowserAction(){
+    browser.browserAction.enable();
+    browser.browserAction.setTitle({"title": "KodiControl: connected"})
+}
+
+function disableDisableAction(){
+    browser.browserAction.disable();
+    browser.browserAction.setTitle({"title": "KodiControl: not connected to a Kodi device!"})
+}

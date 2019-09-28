@@ -17,19 +17,36 @@ function get_volume(resp) {
 }
 
 function getKodiState(){
-    var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume", "muted"] }, "id": 1 };
-        // getHostData(data, get_volume, true);
-    getHostData(data, function(resp){var json = JSON.parse(resp); kodi_volume = json["result"]["volume"]; kodi_mute = json["result"]["muted"];}, true);
+    var data = { "method": "Application.GetProperties", "params": { "properties": ["volume", "muted", "name"] }};
+    func = function(resp){
+        var json = JSON.parse(resp);
+        kodi_volume = json["result"]["volume"];
+        kodi_mute = json["result"]["muted"];
+        browser.browserAction.enable();
+        browser.browserAction.setTitle({"title": "KodiControl: connected to "+json["result"]["name"]})
+        if (unplayed > 0) {
+            browser.browserAction.setBadgeText({ text: (unplayed).toString() });
+        } else {
+            browser.browserAction.setBadgeText({ text: "" });
+        }
+    }
+
+    error_func = function(){
+        browser.browserAction.disable();
+        browser.browserAction.setTitle({"title": "KodiControl: not connected to Kodi!"})
+        browser.browserAction.setBadgeText({ text: "" });
+    }
+    sendRequestToHost(data, func, true, error_func);
 }
 
 function getAPI(){
-    var data = { "jsonrpc": "2.0", "method": "JSONRPC.Introspect", "id": 1 };
-    getHostData(data, parseJSON, true);
+    var data = {"method": "JSONRPC.Introspect"};
+    sendRequestToHost(data, parseJSON, true);
 }
 
 function set_volume(volume) {
     var data = { "method": "Application.SetVolume", "params": { "volume": parseInt(volume) } };
-    getHostData(data, null, false);
+    sendRequestToHost(data, null, false);
 }
 
 function check_media(filepath) {
@@ -129,11 +146,11 @@ browser.contextMenus.create({
 function play_media(id, queue) {
     if (media_list[id]) {
         if (media_list[id]["type"] == "video") {
-            var data = { "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "file": media_list[id]["path"] } }, "id": 1 };
+            var data = { "method": "Player.Open", "params": { "item": { "file": media_list[id]["path"] } } };
             if (queue) {
                 data = { "method": "Playlist.Add", "params": { "playlistid": 1, "item": { "file": media_list[id]["path"] } } };
             }
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
         } if (media_list[id]["type"] == "youtube") {
             var data = { "method": "Player.Open", "params": { "item": { "file": "" } } };
             if (queue) {
@@ -151,38 +168,11 @@ function play_media(id, queue) {
     }
 }
 
-function getHostData(data, func, note) {
+function sendRequestToHost(data, func, note, error_func, final_func) {
     var getting = browser.storage.local.get(null, function (result) {
         var hostData = result;
-        sendRequestToKODI(data, hostData, func, note);
+        sendRequest(data, hostData, func, note, error_func, final_func, "POST");
     });
-}
-
-function sendRequestToKODI(data, hostData, func, note) {
-    var xhr = new XMLHttpRequest();
-    data["jsonrpc"] = "2.0";
-    data["id"] = 1;
-    request = "http://" + encodeURIComponent(hostData.user) + ":" + encodeURIComponent(hostData.pass) + "@" + encodeURIComponent(hostData.host) + ":" + encodeURIComponent(hostData.port) + "/jsonrpc";
-    xhr.open("POST", request, true);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.timeout = 5000;
-    xhr.onreadystatechange = function (aEvt) {
-        if (note) {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200 && func) {
-                    // browser.browserAction.enable();
-                    var resp = xhr.responseText;
-                    console.log("response: ", resp)
-                    func(resp);
-                } else {
-                    // notify("Error Sending request to KODI");
-                    // browser.browserAction.disable();
-                    console.log("response: ", resp)
-                }
-            }
-        }
-    };
-    xhr.send(JSON.stringify(data));
 }
 
 function parseJSON(resp) {
@@ -207,82 +197,82 @@ function idToURL(id, mediaid) {
             break;
         case "b_clearlist":
             var data = { "method": "Playlist.Clear", "params": { "playlistid": 1 } };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "eye":
             fullscreen = !fullscreen;
             var data = { "method": "GUI.SetFullscreen", "params": [fullscreen] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "b_stop":
             var data = { "method": "Input.ExecuteAction", "params": ["stop"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "info":
             var data = { "method": "Input.ShowOSD", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "prev":
             var data = { "method": "Input.ExecuteAction", "params": ["skipprevious"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "next":
             var data = { "method": "Input.ExecuteAction", "params": ["skipnext"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "b_volmute":
             var data = { "method": "Input.ExecuteAction", "params": ["mute"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "b_volup":
             var data = { "method": "Input.ExecuteAction", "params": ["volumeup"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "b_voldown":
             var data = { "method": "Input.ExecuteAction", "params": ["volumedown"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "up":
             var data = { "method": "Input.Up", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "down":
             var data = { "method": "Input.Down", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "left":
             var data = { "method": "Input.Left", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "right":
             var data = { "method": "Input.Right", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "ok":
             var data = { "method": "Input.Select", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "back":
             var data = { "method": "Input.Back", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "context":
             var data = { "method": "Input.ContextMenu", "params": [] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "text":
             send_text();
             break;
         case "playpause":
             var data = { "method": "Input.ExecuteAction", "params": ["pause"] };
-            getHostData(data, parseJSON);
+            sendRequestToHost(data, parseJSON);
             break;
         case "playmedia":
             idToURL("b_stop", 0);
             play_media(mediaid, false);
             break;
         case "playing":
-            getHostData();
+            sendRequestToHost();
             // play_media();
             break;
             window.close();
@@ -311,7 +301,7 @@ function parseYoutubeURL(data, url) {
     } else {
 
         data["params"]["item"]["file"] = "plugin://plugin.video.youtube/play/?video_id="+ yt_data['video_id']
-        getHostData(data, parseJSON);
+        sendRequestToHost(data, parseJSON);
     }
 }
 //////////////////////////////////////////////////////messageing//////////////////////////////////////////////////
@@ -321,16 +311,13 @@ function handleMessage(request, sender, sendResponse) {
     if (request.selectedId) {
         idToURL(request.selectedId, request.id);
     } else if (request.text) {
-        var data = { "jsonrpc": "2.0", "method": "Input.SendText", "params": [request.text], "id": 1 };
-        getHostData(data, parseJSON, false);
+        var data = {"method": "Input.SendText", "params": [request.text] };
+        sendRequestToHost(data, parseJSON, false);
 
     } else if (request.volume) {
         set_volume(request.volume);
         kodi_volume = request.volume;
     } else if (request.onload) {
-        // var data = { "jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": ["volume", "muted"] }, "id": 1 };
-        // getHostData(data, get_volume, true);
-        getKodiState();
         sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume, muted: kodi_mute});
     }
 }
@@ -358,6 +345,9 @@ function notify(message) {
 
 ////////////////////////////////////////////////////////////////listeners////////////////////////////////////////////////////
 
+window.setInterval(function(){
+    getKodiState();
+}, 5000);
 
 browser.webRequest.onBeforeRequest.addListener(
     logURL,
@@ -367,9 +357,8 @@ browser.webRequest.onBeforeRequest.addListener(
 browser.contextMenus.onClicked.addListener(function (info, tab) {
     switch (info.menuItemId) {
         case "send-kodi":
-            // console.log("from context menu: ", info.srcUrl);
-            var data = { "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "file": info.srcUrl } }, "id": 1 };
-            getHostData(data, parseJSON);
+            var data = { "method": "Player.Open", "params": { "item": { "file": info.srcUrl } }};
+            sendRequestToHost(data, parseJSON);
             break;
         }
     });

@@ -41,51 +41,61 @@ function checkInputFields(){
     return valid;
 }
 
+
+function getHostDateFromInput(){
+    hostData = {}
+    hostData["host"] = document.querySelector("#host").value.replace("http://", "");
+    hostData["port"] = document.querySelector("#port").value;
+    hostData["user"] = document.querySelector("#user").value;
+    hostData["pass"] = document.querySelector("#pass").value;
+    return hostData;
+}
+
 function testConnection(e) {
     if(!checkInputFields()) return;
     e.target.innerHTML = "Checking...";
     e.target.style.backgroundColor = "#dee06d";
-    var host = document.querySelector("#host").value.replace("http://", "");
-    var port = document.querySelector("#port").value;
-    var user = document.querySelector("#user").value;
-    var pass = document.querySelector("#pass").value;
+    hostData = getHostDateFromInput();
+    var data = {"method": "JSONRPC.Version"};
 
-    var xhr = new XMLHttpRequest();
-
-    var data = {};
-    data["method"] = "JSONRPC.Version";
-    data["jsonrpc"] = "2.0";
-    data["id"] = 1;
-    xhr.open("GET", "http://" + encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@" + encodeURIComponent(host) + ":" + encodeURIComponent(port) + "/jsonrpc?request=" + JSON.stringify(data), true);
-    xhr.timeout = 5000;
-    xhr.onreadystatechange = function (aEvt) {
-        if (xhr.readyState == 4) {
-            if(xhr.status == 200) {
-                var resp = xhr.responseText;
-                var json = JSON.parse(resp);
-                if (json["result"]) buttonCheckOK(e);
-                else buttonCheckERROR(e);
-            } else {
-                buttonCheckERROR(e);
-            }
+    func = function(resp){
+        var json = JSON.parse(resp);
+        if (json["result"]){
+            buttonCheckOK(e);
+            // enableBrowserAction();
         }
+        else{
+            buttonCheckERROR(e);
+            // disableDisableAction();
+        }
+    };
 
+    error_func = function(){
+        buttonCheckERROR(e);
+        // disableDisableAction();
+    };
+
+    final_func = function(){
         window.setTimeout(function() {
             e.target.innerHTML = "Test Connection";
             e.target.style.backgroundColor = "#eee";
         }, 2000);
     };
-    xhr.send();
+
+    sendRequest(data, hostData, func, true, error_func, final_func, "GET");
 }
 
-function saveOptions(e) {
+function saveHostData(){
     browser.storage.local.set({
         host: document.querySelector("#host").value.replace("http://", ""),
         port: document.querySelector("#port").value,
         user: document.querySelector("#user").value,
         pass: document.querySelector("#pass").value
     });
+}
 
+function saveOptions(e) {
+    saveHostData();
     e.target.innerHTML = "Saved";
     e.target.style.backgroundColor = "#6de075";
 
