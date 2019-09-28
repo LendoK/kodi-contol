@@ -1,71 +1,69 @@
 
 function startaction(action, id) {
+    var sending;
     switch (action) {
         case "text":
             var string = document.getElementById("textfield");
-            browser.runtime.sendMessage({ "text": string.value });
+            sending = browser.runtime.sendMessage({ "text": string.value });
             break;
         case "Play/Pause":
-            browser.runtime.sendMessage({ "selectedId": "playpause" });
+            sending = browser.runtime.sendMessage({ "selectedId": "playpause" });
             break;
         case "eye":
-            browser.runtime.sendMessage({ "selectedId": "eye" });
+            sending = browser.runtime.sendMessage({ "selectedId": "eye" });
             break;
         case "Play Media":
-            browser.runtime.sendMessage({ "selectedId": "playmedia", "id": id });
+            sending = browser.runtime.sendMessage({ "selectedId": "playmedia", "id": id });
             break;
         case "queue Media":
-            browser.runtime.sendMessage({ "selectedId": "queue Media", "id": id });
+            sending = browser.runtime.sendMessage({ "selectedId": "queue Media", "id": id });
             break;
         case "Stop":
-            browser.runtime.sendMessage({ "selectedId": "b_stop" });
+            sending = browser.runtime.sendMessage({ "selectedId": "b_stop" });
             break;
         case "playing":
-            browser.runtime.sendMessage({ "selectedId": "playing" });
+            sending = browser.runtime.sendMessage({ "selectedId": "playing" });
             break;
         case "mute":
-            browser.runtime.sendMessage({ "selectedId": "b_volmute" });
+            sending = browser.runtime.sendMessage({ "selectedId": "b_volmute" });
             break;
         case "prev":
-            browser.runtime.sendMessage({ "selectedId": "prev" });
+            sending = browser.runtime.sendMessage({ "selectedId": "prev" });
             break;
         case "next":
-            browser.runtime.sendMessage({ "selectedId": "next" });
+            sending = browser.runtime.sendMessage({ "selectedId": "next" });
             break;
         case "up":
-            browser.runtime.sendMessage({ "selectedId": "up" });
+            sending = browser.runtime.sendMessage({ "selectedId": "up" });
             break;
         case "down":
-            browser.runtime.sendMessage({ "selectedId": "down" });
+            sending = browser.runtime.sendMessage({ "selectedId": "down" });
             break;
         case "left":
-            browser.runtime.sendMessage({ "selectedId": "left" });
+            sending = browser.runtime.sendMessage({ "selectedId": "left" });
             break;
         case "right":
-            browser.runtime.sendMessage({ "selectedId": "right" });
+            sending = browser.runtime.sendMessage({ "selectedId": "right" });
             break;
         case "ok":
-            browser.runtime.sendMessage({ "selectedId": "ok" });
+            sending = browser.runtime.sendMessage({ "selectedId": "ok" });
             break;
         case "back":
-            browser.runtime.sendMessage({ "selectedId": "back" });
+            sending = browser.runtime.sendMessage({ "selectedId": "back" });
             break;
         case "context":
-            browser.runtime.sendMessage({ "selectedId": "context" });
+            sending = browser.runtime.sendMessage({ "selectedId": "context" });
             break;
         case "info":
-            browser.runtime.sendMessage({ "selectedId": "info" });
-            break;
-        case "text":
-            break;
-        case "Send local file":
-            openMyPage()
+            sending = browser.runtime.sendMessage({ "selectedId": "info" });
             break;
     }
+    if(sending) sending.then(handleResponsePO, handleError);
 }
 
 
 function handleResponsePO(message) {
+    console.log("handle response");
     if ("url" in message) {
         media = message.url;
         getDomainMediaList(message.url);
@@ -74,7 +72,15 @@ function handleResponsePO(message) {
         document.getElementById("volume").value = message.volume;
     }
     if ("muted" in message) {
-        document.getElementById("mute").src = message.muted ? "/icons/mute.svg" : "/icons/audio.svg";
+        image = document.getElementById('mute');
+        // image.id = "mute";
+        if(message.muted){
+            image.src = "/icons/mute.svg";
+            console.log("set mute");
+        }else{
+            image.src = "/icons/audio.svg";
+            console.log("set audio");
+        }
     }
 }
 
@@ -140,6 +146,9 @@ function getDomainMediaList(mlist){
 
 function create_media_list(domain, mlist) {
     var list = document.getElementById("media_list");
+    while (list.firstChild) {
+        list.removeChild(list.firstChild);
+    }
     for (var i = mlist.length -1; i >= 0 ; i--) {
         if(domain == mlist[i]["domain"]){
             var container = document.createElement("div");
@@ -171,12 +180,6 @@ function create_media_list(domain, mlist) {
         }
     }
 
-}
-
-function openMyPage() {
-    browser.tabs.create({
-        "url": "/local_files/local_files.html"
-    });
 }
 
 document.addEventListener("click", (e) => {

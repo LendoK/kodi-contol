@@ -22,6 +22,11 @@ function getKodiState(){
         var json = JSON.parse(resp);
         kodi_volume = json["result"]["volume"];
         kodi_mute = json["result"]["muted"];
+
+        var gettingItem = browser.storage.local.get('host');
+        gettingItem.then((res) => {
+            host = res.host
+        });
         browser.browserAction.enable();
         browser.browserAction.setTitle({"title": "KodiControl: connected to "+json["result"]["name"]})
         if (unplayed > 0) {
@@ -51,11 +56,8 @@ function set_volume(volume) {
 
 function check_media(filepath) {
     if (/\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)) {
-        var re = new RegExp(host);
         var ping = new RegExp(/(ping.gif)+/i);
-        if (re.test(filepath)) {
-            return false;
-        } else if (ping.test(filepath)) {
+        if (ping.test(filepath)) {
             return false;
         } else {
             return true;
@@ -66,6 +68,10 @@ function check_media(filepath) {
 
 function logURL(requestDetails) {
     var url = requestDetails.url;
+    var re = new RegExp(host);
+    if (re.test(url)) {
+        return;
+    }
     if (check_media(url)) {
         var filename = url.replace(/^.*[\\\/]/, '');
         var singleObj = {};
@@ -317,9 +323,10 @@ function handleMessage(request, sender, sendResponse) {
     } else if (request.volume) {
         set_volume(request.volume);
         kodi_volume = request.volume;
-    } else if (request.onload) {
-        sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume, muted: kodi_mute});
     }
+    getKodiState();
+    sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume, muted: kodi_mute});
+
 }
 
 function handleResponse(message) {
