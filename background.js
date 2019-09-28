@@ -1,7 +1,7 @@
 var pattern = "<all_urls>";
-var videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
-var playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
-var youtube_pattern = "https://www.youtube.com/*";
+var yt_videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
+var yt_playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
+var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)\?action=(log_stream_play|load_config)/;
 
 /* global media_list */
 media_list = [];
@@ -10,11 +10,6 @@ var kodi_mute
 var host;
 var fullscreen = true;
 var unplayed = 0;
-
-function get_volume(resp) {
-    var json = JSON.parse(resp);
-    kodi_volume = json["result"]["volume"];
-}
 
 function getKodiState(){
     var data = { "method": "Application.GetProperties", "params": { "properties": ["volume", "muted", "name"] }};
@@ -85,60 +80,65 @@ function logURL(requestDetails) {
     if (re.test(url)) {
         return;
     }
+    var listEntry = {};
+    // normal media
     if (check_media(url)) {
         var filename = url.replace(/^.*[\\\/]/, '');
-        var singleObj = {};
-        var i = 0;
-        for (i = 0; i < media_list.length; i++) {
-            if (media_list[i]['name'] == filename) {
-                return;
-            }
-        }
-        singleObj['name'] = filename;
-        singleObj['path'] = url;
-        singleObj['type'] = "video";
-        singleObj['domain'] = extractRootDomain(url);
-        singleObj["played"] = false;
-        media_list.push(singleObj);
-        unplayed += 1;
-        set_badgeText();
+        listEntry['name'] = filename;
+        listEntry['id'] = filename;
+        listEntry['path'] = url;
+        listEntry['type'] = "video";
+        listEntry['domain'] = extractRootDomain(url);
+        listEntry["played"] = false;
     }
-    var matchVideo = videoPattern.exec(url);
-    var matchList = playlistPattern.exec(url);
-
+    // youtube
+    var matchVideo = yt_videoPattern.exec(url);
+    var matchList = yt_playlistPattern.exec(url);
     if (matchVideo || matchList) {
-        var singleObj = {};
-        var i = 0;
+        var id;
         if (matchVideo) {
-            filename = matchVideo[1];
+            id = matchVideo[1];
         } else {
-            filename = matchList[1];
+            id = matchList[1];
         }
+        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id));
+        listEntry['name'] = title_info.title;
+        listEntry['type'] = "youtube";
+        listEntry['path'] = url;
+        listEntry['domain'] = extractRootDomain(url);
+        listEntry["played"] = false;
+        listEntry["id"] = id;
+    }
+    //vimeo
+    var matchVideo = vimeo_videoPattern.exec(url);
+    if (matchVideo) {
+        var id = matchVideo[1];
+        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://vimeo.com/' + id));
+        listEntry['name'] = title_info.title;
+        listEntry['type'] = "vimeo";
+        listEntry['path'] = url;
+        listEntry['domain'] = extractRootDomain(url);
+        listEntry["played"] = false;
+        listEntry["id"] = id
+    }
+
+    if(listEntry){
         for (i = 0; i < media_list.length; i++) {
-            if (media_list[i]['name'] == filename) {
+            if (media_list[i]['id'] == listEntry["id"]) {
                 return;
             }
         }
-        var json_obj = JSON.parse(GetJson('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + filename));
-
-        singleObj['type'] = "youtube";
-        singleObj['name'] = json_obj.title;
-        singleObj['path'] = url;
-        singleObj['domain'] = extractRootDomain(url);
-        singleObj["played"] = false;
-        media_list.push(singleObj);
+        media_list.push(listEntry);
         unplayed += 1;
-        set_badgeText();
-
-    }
-    if (media_list.length > 10) {
-        if (media_list[9].played == false) {
-            unplayed -= 1;
+        if (media_list.length > 10) {
+            if (media_list[9].played == false) {
+                unplayed -= 1;
+            }
+            media_list.shift();
         }
-        media_list.shift();
-
         set_badgeText();
     }
+
 }
 
 function GetJson(yourUrl) {
@@ -167,15 +167,23 @@ function play_media(id, queue) {
         if (media_list[id]["type"] == "video") {
             var data = { "method": "Player.Open", "params": { "item": { "file": media_list[id]["path"] } } };
             if (queue) {
-                data = { "method": "Playlist.Add", "params": { "playlistid": 1, "item": { "file": media_list[id]["path"] } } };
+                data["method"] = "Playlist.Add";
             }
             sendRequestToHost(data, parseJSON);
-        } if (media_list[id]["type"] == "youtube") {
-            var data = { "method": "Player.Open", "params": { "item": { "file": "" } } };
+        }
+        if (media_list[id]["type"] == "youtube") {
+            var data = { "method": "Player.Open", "params": { "item": { "file": "plugin://plugin.video.youtube/play/?video_id="+ media_list[id]["id"] } } };
             if (queue) {
-                data = { "method": "Playlist.Add", "params": { "playlistid": 1, "item": { "file": media_list[id]["path"] } } };
+                data["method"] = "Playlist.Add";
             }
-            parseYoutubeURL(data, media_list[id]["path"]);
+            sendRequestToHost(data, parseJSON);
+        }
+        if (media_list[id]["type"] == "vimeo") {
+            var data = { "method": "Player.Open", "params": { "item": { "file": "plugin://plugin.video.vimeo/play/?video_id=" + media_list[id]["id"] } }};
+            if (queue) {
+                data["method"] = "Playlist.Add";
+            }
+            sendRequestToHost(data, parseJSON);
         }
         if (media_list[id]["played"] == false) {
             unplayed -= 1;
@@ -298,31 +306,6 @@ function idToURL(id, mediaid) {
     }
 }
 
-function parseYoutubeURL(data, url) {
-
-    var yt_data = {};
-    yt_data['order'] = 'default';
-    yt_data['play'] = '1';
-
-    var matchVideo = videoPattern.exec(url);
-    var matchList = playlistPattern.exec(url);
-
-    if (matchVideo && matchVideo.length > 1) {
-        yt_data['video_id'] = matchVideo[1];
-    }
-    if (matchList && matchList.length > 1) {
-        yt_data['playlist_id'] = matchList[1];
-    }
-
-    if (!matchVideo && !matchList) {
-        // notify("This is not youtube URL, trying something else");
-        play_media();
-    } else {
-
-        data["params"]["item"]["file"] = "plugin://plugin.video.youtube/play/?video_id="+ yt_data['video_id']
-        sendRequestToHost(data, parseJSON);
-    }
-}
 //////////////////////////////////////////////////////messaging//////////////////////////////////////////////////
 
 

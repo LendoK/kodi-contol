@@ -188,6 +188,17 @@ ul {
   background-position: 1.5% 50%;
 
 }
+.vimeo {
+  background-image: url('/icons/Vimeo.svg');
+
+}
+.vimeo:hover {
+  background: #eee url('/icons/Vimeo.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+
+}
 .mp4 {
   background-image: url('/icons/MP4_icon.svg');
   background-size: 20px 20px;

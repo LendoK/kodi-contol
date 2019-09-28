@@ -159,7 +159,9 @@ function create_media_list(domain, mlist) {
 
             if (mlist[i]["type"] == "youtube") {
                 div.className = "list item youtube";
-            } else {
+            } else if(mlist[i]["type"] == "vimeo"){
+                div.className = "list item vimeo";
+            }else {
                 div.className = "list item mp4";
             }
             div.id = i;
