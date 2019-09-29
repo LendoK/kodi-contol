@@ -1,4 +1,5 @@
 var yt_videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
+var yt_videoPattern2 = /^https?:\/\/youtu.be\/([A-Za-z0-9_-]{11})/;
 var yt_playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
 var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)(\?action=(log_stream_play|load_config))*/;
 var videoPattern = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/
@@ -43,16 +44,18 @@ function mediaFromURL(url){
     }
     // youtube
     var matchVideo = yt_videoPattern.exec(url);
+    var matchVideo2 = yt_videoPattern2.exec(url);
     var matchList = yt_playlistPattern.exec(url);
-    if (matchVideo || matchList) {
+    if (matchVideo || matchList || matchVideo2) {
         var id;
         if (matchVideo) {
             id = matchVideo[1];
-        } else {
+        } else if(matchList){
             id = matchList[1];
+        } else {
+            id = matchVideo2[1];
         }
-        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id));
-        media['name'] = title_info.title;
+        media['name'] = url;
         media['type'] = "youtube";
         media['path'] = url;
         media['domain'] = extractRootDomain(url);
@@ -65,8 +68,8 @@ function mediaFromURL(url){
     var matchVideo = vimeo_videoPattern.exec(url);
     if (matchVideo) {
         var id = matchVideo[1];
-        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://vimeo.com/' + id));
-        media['name'] = title_info.title;
+
+        media['name'] = url;
         media['type'] = "vimeo";
         media['path'] = url;
         media['domain'] = extractRootDomain(url);
@@ -83,27 +86,57 @@ function mediaFromURL(url){
 //
 
 
-function logURL(requestDetails) {
-    var listEntry = mediaFromURL(requestDetails.url);
-
-    if(listEntry){
-        if(listEntry["type"] != "image"){
-            for (i = 0; i < media_list.length; i++) {
-                if (media_list[i]['id'] == listEntry["id"]) {
-                    return;
-                }
-            }
-            media_list.push(listEntry);
-            unplayed += 1;
-            if (media_list.length > 10) {
-                if (media_list[9].played == false) {
-                    unplayed -= 1;
-                }
-                media_list.shift();
-            }
-            set_badgeText();
+function addToMediaList(listEntry){
+    for (i = 0; i < media_list.length; i++) {
+        if (media_list[i]['id'] == listEntry["id"]) {
+            return;
         }
     }
+    media_list.push(listEntry);
+    unplayed += 1;
+    if (media_list.length > 10) {
+        if (media_list[9].played == false) {
+            unplayed -= 1;
+        }
+        media_list.shift();
+    }
+    set_badgeText();
+}
+
+function logURL(requestDetails) {
+    var listEntry = mediaFromURL(requestDetails.url);
+    if(listEntry && listEntry["type"] != "image"){
+        if(listEntry.type == "vimeo" || listEntry.type == "youtube"){
+            getTitleInfo(listEntry);
+        }else{
+            addToMediaList(listEntry);
+        }
+    }
+}
+
+// get titile info via request to "https://noembed.com/embed"
+function getTitleInfo(media){
+    var xhr = new XMLHttpRequest();
+    if(media.type == "youtube"){
+        var url = 'https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + media.id
+    }else{
+        var url = 'https://noembed.com/embed?url=https://vimeo.com/' + media.id
+    }
+    xhr.open("GET", url, true);
+    xhr.timeout = 2000;
+    xhr.onreadystatechange = function(aEvt) {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                var resp = xhr.responseText;
+                var title_info = JSON.parse(resp);
+                media["name"] = title_info.title;
+                addToMediaList(media);
+                return;
+            }
+        }
+        addToMediaList(media);
+    }
+    xhr.send(null);
 }
 
 function getUnplayedPerPage(){

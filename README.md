@@ -8,6 +8,7 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 * start playing a media link in your Browser. The extension will detect the media as soon as it starts playing
 * click on the KodiControl Icon in the headerbar
 * click on the media in the list on the bottom. KodiControl will send the media link to the connected Kodi device where it starts playing immediately
+* alternatively right click on a media link and select "send to kodi"/"send link to kodi"
 
 ![screenshot](./screenshot.png)
 
@@ -20,6 +21,7 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 * send string to kodi
 * send youtube videos to kodi (youtube addon required)
 * send vimeo videos to kodi (vimeo addon required)
+* send images and videos from contextmenu
 
 ## Settings
 * HOST: IP address of Kodi
