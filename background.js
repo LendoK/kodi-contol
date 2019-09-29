@@ -1,7 +1,8 @@
-var pattern = "<all_urls>";
 var yt_videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
 var yt_playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
-var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)\?action=(log_stream_play|load_config)/;
+var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)(\?action=(log_stream_play|load_config))*/;
+var videoPattern = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/
+var imagePattern = /\.(jpg|png)+/
 
 /* global media_list */
 media_list = [];
@@ -10,6 +11,159 @@ var kodi_mute
 var host;
 var fullscreen = true;
 var unplayed = 0;
+
+
+//
+// ─── PARSE URL ──────────────────────────────────────────────────────────────────
+//
+
+function mediaFromURL(url){
+    var re = new RegExp(host);
+    if (re.test(url)) {
+        return null;
+    }
+    re = new RegExp("https://noembed.com/embed");
+    if (re.test(url)) {
+        return null;
+    }
+    var media = {};
+    // normal media
+    var matchVideo = videoPattern.exec(url);
+    var matchImage = imagePattern.exec(url);
+    if (matchVideo || matchImage) {
+        var filename = url.replace(/^.*[\\\/]/, '');
+        media['name'] = filename;
+        media['id'] = filename;
+        media['path'] = url;
+        media['type'] = matchImage ? "image" : "video";
+        media['domain'] = extractRootDomain(url);
+        media["played"] = false;
+        media["params"] = { "item": { "file": url } }
+        return media;
+    }
+    // youtube
+    var matchVideo = yt_videoPattern.exec(url);
+    var matchList = yt_playlistPattern.exec(url);
+    if (matchVideo || matchList) {
+        var id;
+        if (matchVideo) {
+            id = matchVideo[1];
+        } else {
+            id = matchList[1];
+        }
+        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id));
+        media['name'] = title_info.title;
+        media['type'] = "youtube";
+        media['path'] = url;
+        media['domain'] = extractRootDomain(url);
+        media["played"] = false;
+        media["id"] = id;
+        media["params"] = { "item": { "file": "plugin://plugin.video.youtube/play/?video_id="+ id } }
+        return media;
+    }
+    //vimeo
+    var matchVideo = vimeo_videoPattern.exec(url);
+    if (matchVideo) {
+        var id = matchVideo[1];
+        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://vimeo.com/' + id));
+        media['name'] = title_info.title;
+        media['type'] = "vimeo";
+        media['path'] = url;
+        media['domain'] = extractRootDomain(url);
+        media["played"] = false;
+        media["id"] = id
+        media["params"] = { "item": { "file": "plugin://plugin.video.vimeo/play/?video_id=" + id} }
+        return media;
+    }
+    return null;
+}
+
+//
+// ─── PREPARE MEDIA ──────────────────────────────────────────────────────────────
+//
+
+
+function logURL(requestDetails) {
+    var listEntry = mediaFromURL(requestDetails.url);
+
+    if(listEntry){
+        if(listEntry["type"] != "image"){
+            for (i = 0; i < media_list.length; i++) {
+                if (media_list[i]['id'] == listEntry["id"]) {
+                    return;
+                }
+            }
+            media_list.push(listEntry);
+            unplayed += 1;
+            if (media_list.length > 10) {
+                if (media_list[9].played == false) {
+                    unplayed -= 1;
+                }
+                media_list.shift();
+            }
+            set_badgeText();
+        }
+    }
+}
+
+function getUnplayedPerPage(){
+    browser.tabs.query({currentWindow: true, active: true})
+    .then((tabs) => {
+        var domain = extractRootDomain(tabs[0].url);
+        unplayed = 0;
+        for(var i = 0; i < media_list.length; i++){
+            if(domain == media_list[i]["domain"] && !media_list[i].played){
+                unplayed++;
+            }
+        }
+        set_badgeText();
+    })
+}
+
+function GetJson(yourUrl) {
+    var Httpreq = new XMLHttpRequest(); // a new request
+    Httpreq.open("GET", yourUrl, false);
+    Httpreq.send(null);
+    return Httpreq.responseText;
+}
+
+function set_badgeText() {
+    if (unplayed > 0) {
+        browser.browserAction.setBadgeText({ text: (unplayed).toString() });
+    } else {
+        browser.browserAction.setBadgeText({ text: "" });
+    }
+}
+
+function play_media(id, queue) {
+    if (media_list[id]) {
+        var data = { "method": "Player.Open", "params": media_list[id].params};
+        if (queue) {
+            data["method"] = "Playlist.Add";
+        }
+        sendRequestToHost(data, parseJSON);
+
+        if (media_list[id]["played"] == false) {
+            unplayed -= 1;
+            media_list[id]["played"] = true;
+            set_badgeText();
+        }
+    } else {
+        notify("Error Nothing to play");
+    }
+}
+
+
+//
+// ─── KODI REQUESTS ──────────────────────────────────────────────────────────────
+//
+
+function sendRequestToHost(data, func, note, error_func, final_func) {
+    var getting = browser.storage.local.get(null, function (result) {
+        var hostData = result;
+        sendRequest(data, hostData, func, note, error_func, final_func, "POST");
+    });
+}
 
 function getKodiState(){
     var data = { "method": "Application.GetProperties", "params": { "properties": ["volume", "muted", "name"] }};
@@ -49,158 +203,6 @@ function set_volume(volume) {
     sendRequestToHost(data, null, false);
 }
 
-function check_media(filepath) {
-    if (/\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/i.test(filepath)) {
-        var ping = new RegExp(/(ping.gif)+/i);
-        if (ping.test(filepath)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-}
-
-function getUnplayedPerPage(){
-    browser.tabs.query({currentWindow: true, active: true})
-    .then((tabs) => {
-        var domain = extractRootDomain(tabs[0].url);
-        unplayed = 0;
-        for(var i = 0; i < media_list.length; i++){
-            if(domain == media_list[i]["domain"] && !media_list[i].played){
-                unplayed++;
-            }
-        }
-        set_badgeText();
-    })
-}
-
-function logURL(requestDetails) {
-    var url = requestDetails.url;
-    var re = new RegExp(host);
-    if (re.test(url)) {
-        return;
-    }
-    var listEntry = {};
-    // normal media
-    if (check_media(url)) {
-        var filename = url.replace(/^.*[\\\/]/, '');
-        listEntry['name'] = filename;
-        listEntry['id'] = filename;
-        listEntry['path'] = url;
-        listEntry['type'] = "video";
-        listEntry['domain'] = extractRootDomain(url);
-        listEntry["played"] = false;
-    }
-    // youtube
-    var matchVideo = yt_videoPattern.exec(url);
-    var matchList = yt_playlistPattern.exec(url);
-    if (matchVideo || matchList) {
-        var id;
-        if (matchVideo) {
-            id = matchVideo[1];
-        } else {
-            id = matchList[1];
-        }
-        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id));
-        listEntry['name'] = title_info.title;
-        listEntry['type'] = "youtube";
-        listEntry['path'] = url;
-        listEntry['domain'] = extractRootDomain(url);
-        listEntry["played"] = false;
-        listEntry["id"] = id;
-    }
-    //vimeo
-    var matchVideo = vimeo_videoPattern.exec(url);
-    if (matchVideo) {
-        var id = matchVideo[1];
-        var title_info = JSON.parse(GetJson('https://noembed.com/embed?url=https://vimeo.com/' + id));
-        listEntry['name'] = title_info.title;
-        listEntry['type'] = "vimeo";
-        listEntry['path'] = url;
-        listEntry['domain'] = extractRootDomain(url);
-        listEntry["played"] = false;
-        listEntry["id"] = id
-    }
-
-    if(listEntry){
-        for (i = 0; i < media_list.length; i++) {
-            if (media_list[i]['id'] == listEntry["id"]) {
-                return;
-            }
-        }
-        media_list.push(listEntry);
-        unplayed += 1;
-        if (media_list.length > 10) {
-            if (media_list[9].played == false) {
-                unplayed -= 1;
-            }
-            media_list.shift();
-        }
-        set_badgeText();
-    }
-
-}
-
-function GetJson(yourUrl) {
-    var Httpreq = new XMLHttpRequest(); // a new request
-    Httpreq.open("GET", yourUrl, false);
-    Httpreq.send(null);
-    return Httpreq.responseText;
-}
-
-function set_badgeText() {
-    if (unplayed > 0) {
-        browser.browserAction.setBadgeText({ text: (unplayed).toString() });
-    } else {
-        browser.browserAction.setBadgeText({ text: "" });
-    }
-}
-
-browser.contextMenus.create({
-    id: "send-kodi",
-    title: browser.i18n.getMessage("contextSendToKodi"),
-    contexts: ["image", "video"]
-}, onCreated);
-
-function play_media(id, queue) {
-    if (media_list[id]) {
-        if (media_list[id]["type"] == "video") {
-            var data = { "method": "Player.Open", "params": { "item": { "file": media_list[id]["path"] } } };
-            if (queue) {
-                data["method"] = "Playlist.Add";
-            }
-            sendRequestToHost(data, parseJSON);
-        }
-        if (media_list[id]["type"] == "youtube") {
-            var data = { "method": "Player.Open", "params": { "item": { "file": "plugin://plugin.video.youtube/play/?video_id="+ media_list[id]["id"] } } };
-            if (queue) {
-                data["method"] = "Playlist.Add";
-            }
-            sendRequestToHost(data, parseJSON);
-        }
-        if (media_list[id]["type"] == "vimeo") {
-            var data = { "method": "Player.Open", "params": { "item": { "file": "plugin://plugin.video.vimeo/play/?video_id=" + media_list[id]["id"] } }};
-            if (queue) {
-                data["method"] = "Playlist.Add";
-            }
-            sendRequestToHost(data, parseJSON);
-        }
-        if (media_list[id]["played"] == false) {
-            unplayed -= 1;
-            media_list[id]["played"] = true;
-            set_badgeText();
-        }
-    } else {
-        notify("Error Nothing to play");
-    }
-}
-
-function sendRequestToHost(data, func, note, error_func, final_func) {
-    var getting = browser.storage.local.get(null, function (result) {
-        var hostData = result;
-        sendRequest(data, hostData, func, note, error_func, final_func, "POST");
-    });
-}
 
 function parseJSON(resp) {
     var json = JSON.parse(resp);
@@ -306,8 +308,60 @@ function idToURL(id, mediaid) {
     }
 }
 
-//////////////////////////////////////////////////////messaging//////////////////////////////////////////////////
 
+//
+// ─── CONTEXT MENU ───────────────────────────────────────────────────────────────
+//
+browser.contextMenus.create({
+    id: "send-kodi",
+    title: browser.i18n.getMessage("contextSendToKodi"),
+    contexts: ["image", "video"],
+    visible: false
+}, onCreated);
+
+browser.contextMenus.create({
+    id: "send-link-to-kodi",
+    title: browser.i18n.getMessage("contextSendLinkToKodi"),
+    contexts: ["link"],
+    visible: false
+}, onCreated);
+
+
+browser.contextMenus.onShown.addListener(info => {
+    var media = mediaFromURL(info.srcUrl);
+    browser.contextMenus.update("send-kodi", {
+        visible: media ? true : false
+        });
+    media = mediaFromURL(info.linkUrl);
+    browser.contextMenus.update("send-link-to-kodi", {
+        visible: media ? true : false
+        });
+
+    browser.contextMenus.refresh();
+});
+
+browser.contextMenus.onClicked.addListener(function (info, tab) {
+    switch (info.menuItemId) {
+        case "send-kodi":
+            var media = mediaFromURL(info.srcUrl);
+            if(media){
+                var data = { "method": "Player.Open", "params": media.params};
+                sendRequestToHost(data, parseJSON);
+            }
+            break;
+        case "send-link-to-kodi":
+            var media = mediaFromURL(info.linkUrl);
+            if(media){
+                var data = { "method": "Player.Open", "params": media.params};
+                sendRequestToHost(data, parseJSON);
+            }
+            break;
+        }
+    });
+
+//
+// ─── MESSAGING ──────────────────────────────────────────────────────────────────
+//
 
 function handleMessage(request, sender, sendResponse) {
     if (request.selectedId) {
@@ -346,7 +400,9 @@ function notify(message) {
 }
 
 
-////////////////////////////////////////////////////////////////listeners////////////////////////////////////////////////////
+//
+// ─── LISTENERS ──────────────────────────────────────────────────────────────────
+//
 
 window.setInterval(function(){
     getKodiState();
@@ -356,15 +412,6 @@ browser.webRequest.onBeforeRequest.addListener(
     logURL,
     { urls: ["<all_urls>"] }
     );
-
-browser.contextMenus.onClicked.addListener(function (info, tab) {
-    switch (info.menuItemId) {
-        case "send-kodi":
-            var data = { "method": "Player.Open", "params": { "item": { "file": info.srcUrl } }};
-            sendRequestToHost(data, parseJSON);
-            break;
-        }
-    });
 
 browser.runtime.onMessage.addListener(handleMessage);
 

@@ -16,7 +16,7 @@
 
    "contextSendToKodi": {
     "message": "send to kodi",
-    "description": "Title of context menu item that logs the selected text when clicked.",
+    "description": "send clicked media to kodi",
     "placeholders": {
       "url" : {
         "content" : "$1",
@@ -24,7 +24,16 @@
       }
     }
   },
-
+  "contextSendLinkToKodi": {
+    "message": "send link to kodi",
+    "description": "send clicked link to kodi",
+    "placeholders": {
+      "url" : {
+        "content" : "$1",
+        "example" : "example.png"
+      }
+    }
+  },
   "contextMenuItemRemoveMe": {
     "message": "Remove me!",
     "description": "Title of context menu item that removes itself when clicked."
