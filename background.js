@@ -39,7 +39,7 @@ function mediaFromURL(url){
         media['type'] = matchImage ? "image" : "video";
         media['domain'] = extractRootDomain(url);
         media["played"] = false;
-        media["params"] = { "item": { "file": url } }
+        media["item"] = {"file": url}
         return media;
     }
     // youtube
@@ -61,7 +61,7 @@ function mediaFromURL(url){
         media['domain'] = extractRootDomain(url);
         media["played"] = false;
         media["id"] = id;
-        media["params"] = { "item": { "file": "plugin://plugin.video.youtube/play/?video_id="+ id } }
+        media["item"] = {"file": "plugin://plugin.video.youtube/play/?video_id="+ id}
         return media;
     }
     //vimeo
@@ -75,7 +75,7 @@ function mediaFromURL(url){
         media['domain'] = extractRootDomain(url);
         media["played"] = false;
         media["id"] = id
-        media["params"] = { "item": { "file": "plugin://plugin.video.vimeo/play/?video_id=" + id} }
+        media["item"] = {"file": "plugin://plugin.video.vimeo/play/?video_id=" + id}
         return media;
     }
     return null;
@@ -100,7 +100,7 @@ function addToMediaList(listEntry){
 
 function logURL(requestDetails) {
     var listEntry = mediaFromURL(requestDetails.url);
-    if(listEntry && listEntry["type"] != "image" && !checkIfInMedialist(listEntry)){
+    if(listEntry && listEntry["type"] != "image" && !checkIfInMedia(listEntry)){
         if(listEntry.type == "vimeo" || listEntry.type == "youtube"){
             getTitleInfo(listEntry);
         }else{
@@ -109,7 +109,7 @@ function logURL(requestDetails) {
     }
 }
 
-function checkIfInMedialist(media){
+function checkIfInMedia(media){
     for (i = 0; i < media_list.length; i++) {
         if (media_list[i]['id'] == media['id']) {
             return true;
@@ -134,11 +134,11 @@ function getTitleInfo(media){
                 var resp = xhr.responseText;
                 var title_info = JSON.parse(resp);
                 media["name"] = title_info.title;
-                if(!checkIfInMedialist(media)) addToMediaList(media);
+                if(!checkIfInMedia(media)) addToMediaList(media);
                 return;
             }
         }
-        if(!checkIfInMedialist(media)) addToMediaList(media);
+        if(!checkIfInMedia(media)) addToMediaList(media);
     }
     xhr.send(null);
 }
@@ -174,9 +174,10 @@ function set_badgeText() {
 
 function play_media(id, queue) {
     if (media_list[id]) {
-        var data = { "method": "Player.Open", "params": media_list[id].params};
+        var data = { "method": "Player.Open", "params": {"item": media_list[id].item}};
         if (queue) {
             data["method"] = "Playlist.Add";
+            data["params"]["playlistid"] = 1;
         }
         sendRequestToHost(data, parseJSON);
 
