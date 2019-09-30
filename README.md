@@ -12,6 +12,8 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 
 ![screenshot](./screenshot.png)
 
+![screenshot](./screenshot2.png)
+
 ## Features
 * Remote control buttons
 * Keyboard navigation (UP, DOWN, LEFT, RIGHT, ENTER, BACKSPACE)
