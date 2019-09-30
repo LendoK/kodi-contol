@@ -358,23 +358,43 @@ browser.contextMenus.create({
 }, onCreated);
 
 browser.contextMenus.create({
+    id: "send-kodi-queue",
+    title: browser.i18n.getMessage("contextSendToKodiQueue"),
+    contexts: ["image", "video"],
+    visible: false
+}, onCreated);
+
+browser.contextMenus.create({
     id: "send-link-to-kodi",
     title: browser.i18n.getMessage("contextSendLinkToKodi"),
     contexts: ["link"],
     visible: false
 }, onCreated);
 
+browser.contextMenus.create({
+    id: "send-link-to-kodi-queue",
+    title: browser.i18n.getMessage("contextSendLinkToKodiQueue"),
+    contexts: ["link"],
+    visible: false
+}, onCreated);
 
 browser.contextMenus.onShown.addListener(info => {
     var media = mediaFromURL(info.srcUrl);
     browser.contextMenus.update("send-kodi", {
         visible: media ? true : false
         });
+    //exception for images to queue
+    browser.contextMenus.update("send-kodi-queue", {
+        visible: media && media.type != "image" ? true : false
+        });
+    //links
     media = mediaFromURL(info.linkUrl);
     browser.contextMenus.update("send-link-to-kodi", {
         visible: media ? true : false
         });
-
+    browser.contextMenus.update("send-link-to-kodi-queue", {
+        visible: media ? true : false
+        });
     browser.contextMenus.refresh();
 });
 
@@ -383,14 +403,28 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
         case "send-kodi":
             var media = mediaFromURL(info.srcUrl);
             if(media){
-                var data = { "method": "Player.Open", "params": media.params};
+                var data = { "method": "Player.Open", "params": {"item": media.item}};
+                sendRequestToHost(data, parseJSON);
+            }
+            break;
+        case "send-kodi-queue":
+            var media = mediaFromURL(info.srcUrl);
+            if(media && media.type != "image"){
+                var data = { "method": "Playlist.Add", "params": {"playlistid": 1, "item": media.item}};
                 sendRequestToHost(data, parseJSON);
             }
             break;
         case "send-link-to-kodi":
             var media = mediaFromURL(info.linkUrl);
             if(media){
-                var data = { "method": "Player.Open", "params": media.params};
+                var data = { "method": "Player.Open", "params": {"item": media.item}};
+                sendRequestToHost(data, parseJSON);
+            }
+            break;
+        case "send-link-to-kodi-queue":
+            var media = mediaFromURL(info.linkUrl);
+            if(media){
+                var data = { "method": "Playlist.Add", "params": {"playlistid": 1, "item": media.item}};
                 sendRequestToHost(data, parseJSON);
             }
             break;

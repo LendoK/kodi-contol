@@ -24,8 +24,28 @@
       }
     }
   },
+  "contextSendToKodiQueue": {
+    "message": "send to kodi queue",
+    "description": "send clicked media to kodi queue",
+    "placeholders": {
+      "url" : {
+        "content" : "$1",
+        "example" : "example.png"
+      }
+    }
+  },
   "contextSendLinkToKodi": {
     "message": "send link to kodi",
+    "description": "send clicked link to kodi",
+    "placeholders": {
+      "url" : {
+        "content" : "$1",
+        "example" : "example.png"
+      }
+    }
+  },
+  "contextSendLinkToKodiQueue": {
+    "message": "send link to kodi queue",
     "description": "send clicked link to kodi",
     "placeholders": {
       "url" : {
