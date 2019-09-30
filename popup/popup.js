@@ -161,6 +161,8 @@ function create_media_list(domain, mlist) {
                 div.className = "list item youtube";
             } else if(mlist[i]["type"] == "vimeo"){
                 div.className = "list item vimeo";
+            }else if(mlist[i]["type"] == "twitch"){
+                    div.className = "list item twitch";
             }else {
                 div.className = "list item mp4";
             }

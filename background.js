@@ -4,6 +4,12 @@ var yt_playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_
 var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)(\?action=(log_stream_play|load_config))*/;
 var videoPattern = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/
 var imagePattern = /\.(jpg|png)+/
+var twitchVideoPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/videos\/(\d+)/;
+var twitchVideoPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/videos\/(\d+)/;
+var twitchClipPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/.*\/clip\/([A-Za-z0-9_-]+).*/;
+var twitchClipPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/clips\/([A-Za-z0-9_-]+)+/
+var twitchChannelPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/([A-Za-z0-9_-]+)$/
+var twitchChannelPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/channels\/([A-Za-z0-9_-]+)\/(?!extensions)/
 
 /* global media_list */
 media_list = [];
@@ -47,37 +53,63 @@ function mediaFromURL(url){
     var matchVideo2 = yt_videoPattern2.exec(url);
     var matchList = yt_playlistPattern.exec(url);
     if (matchVideo || matchList || matchVideo2) {
-        var id;
         if (matchVideo) {
-            id = matchVideo[1];
+            media["id"]  = matchVideo[1];
         } else if(matchList){
-            id = matchList[1];
+            media["id"] = matchList[1];
         } else {
-            id = matchVideo2[1];
+            media["id"] = matchVideo2[1];
         }
         media['name'] = url;
         media['type'] = "youtube";
         media['path'] = url;
         media['domain'] = extractRootDomain(url);
         media["played"] = false;
-        media["id"] = id;
-        media["item"] = {"file": "plugin://plugin.video.youtube/play/?video_id="+ id}
+        media["item"] = {"file": "plugin://plugin.video.youtube/play/?video_id="+ media["id"]};
         return media;
     }
     //vimeo
     var matchVideo = vimeo_videoPattern.exec(url);
     if (matchVideo) {
-        var id = matchVideo[1];
-
+        media["id"] = matchVideo[1];
         media['name'] = url;
         media['type'] = "vimeo";
         media['path'] = url;
         media['domain'] = extractRootDomain(url);
         media["played"] = false;
-        media["id"] = id
-        media["item"] = {"file": "plugin://plugin.video.vimeo/play/?video_id=" + id}
+        media["item"] = {"file": "plugin://plugin.video.vimeo/play/?video_id=" + media["id"]};
         return media;
     }
+     // twitch
+     var matchVideo = twitchVideoPattern.exec(url);
+     var matchVideo2 = twitchVideoPattern2.exec(url);
+     var matchClip = twitchClipPattern.exec(url);
+     var matchClip2 = twitchClipPattern2.exec(url);
+     var matchChannel = twitchChannelPattern.exec(url);
+     var matchChannel2 = twitchChannelPattern2.exec(url);
+     if (matchVideo || matchVideo2 || matchChannel || matchChannel2 || matchClip || matchClip2) {
+         if (matchVideo || matchVideo2) {
+            media["id"] = matchVideo ? matchVideo[1] : matchVideo2[1];
+            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&video_id=" + media["id"]};
+            media["sub"] = "video";
+            media['name'] = media["id"];
+        } else if(matchChannel || matchChannel2){
+            media["id"] = matchChannel ? matchChannel[1] : matchChannel2[1];
+            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&channel_name=" + media["id"]};
+            media["sub"] = "channel";
+            media['name'] = media["id"];
+        } else {
+            media["id"] = matchClip ? matchClip[1] : matchClip2[1];
+            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&slug=" + media["id"]};
+            media["sub"] = "clip";
+            media['name'] = media["id"];
+        }
+         media['type'] = "twitch";
+         media['path'] = url;
+         media['domain'] = extractRootDomain(url);
+         media["played"] = false;
+         return media;
+     }
     return null;
 }
 
@@ -101,7 +133,7 @@ function addToMediaList(listEntry){
 function logURL(requestDetails) {
     var listEntry = mediaFromURL(requestDetails.url);
     if(listEntry && listEntry["type"] != "image" && !checkIfInMedia(listEntry)){
-        if(listEntry.type == "vimeo" || listEntry.type == "youtube"){
+        if(listEntry.type == "vimeo" || listEntry.type == "youtube" || (listEntry.type == "twitch" && listEntry.sub == "video")){
             getTitleInfo(listEntry);
         }else{
             addToMediaList(listEntry);
@@ -123,8 +155,10 @@ function getTitleInfo(media){
     var xhr = new XMLHttpRequest();
     if(media.type == "youtube"){
         var url = 'https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + media.id
-    }else{
+    }else if(media.type == "vimeo"){
         var url = 'https://noembed.com/embed?url=https://vimeo.com/' + media.id
+    }else {
+        var url = 'https://noembed.com/embed?url=https://www.twitch.tv/videos/' + media.id
     }
     xhr.open("GET", url, true);
     xhr.timeout = 2000;

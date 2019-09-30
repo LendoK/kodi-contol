@@ -192,6 +192,19 @@ ul {
   background-image: url('/icons/Vimeo.svg');
 
 }
+
+.twitch {
+  background-image: url('/icons/twitch.svg');
+
+}
+.twitch:hover {
+  background: #eee url('/icons/twitch.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+
+}
+
 .vimeo:hover {
   background: #eee url('/icons/Vimeo.svg');
   background-size: 21px 21px;
