@@ -87,11 +87,6 @@ function mediaFromURL(url){
 
 
 function addToMediaList(listEntry){
-    for (i = 0; i < media_list.length; i++) {
-        if (media_list[i]['id'] == listEntry["id"]) {
-            return;
-        }
-    }
     media_list.push(listEntry);
     unplayed += 1;
     if (media_list.length > 10) {
@@ -105,13 +100,22 @@ function addToMediaList(listEntry){
 
 function logURL(requestDetails) {
     var listEntry = mediaFromURL(requestDetails.url);
-    if(listEntry && listEntry["type"] != "image"){
+    if(listEntry && listEntry["type"] != "image" && !checkIfInMedialist(listEntry)){
         if(listEntry.type == "vimeo" || listEntry.type == "youtube"){
             getTitleInfo(listEntry);
         }else{
             addToMediaList(listEntry);
         }
     }
+}
+
+function checkIfInMedialist(media){
+    for (i = 0; i < media_list.length; i++) {
+        if (media_list[i]['id'] == media['id']) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // get titile info via request to "https://noembed.com/embed"
@@ -130,11 +134,11 @@ function getTitleInfo(media){
                 var resp = xhr.responseText;
                 var title_info = JSON.parse(resp);
                 media["name"] = title_info.title;
-                addToMediaList(media);
+                if(!checkIfInMedialist(media)) addToMediaList(media);
                 return;
             }
         }
-        addToMediaList(media);
+        if(!checkIfInMedialist(media)) addToMediaList(media);
     }
     xhr.send(null);
 }
