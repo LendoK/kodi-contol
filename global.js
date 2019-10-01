@@ -70,16 +70,12 @@ function sendRequest(data, hostData, func, note, error_func, final_func, methode
     data["id"] = 1;
     if (typeof(methode)==='undefined') methode = "POST";
     if(methode == "POST"){
-        request = "http://" + encodeURIComponent(hostData.user)
-            + ":" + encodeURIComponent(hostData.pass)
-            + "@" + encodeURIComponent(hostData.host)
-            + ":" + encodeURIComponent(hostData.port)
+        request = "http://" + encodeURIComponent(hostData.host)
+            + ":8080"
             + "/jsonrpc";
     }else{
-        request = "http://" + encodeURIComponent(hostData.user)
-            + ":" + encodeURIComponent(hostData.pass)
-            + "@" + encodeURIComponent(hostData.host)
-            + ":" + encodeURIComponent(hostData.port)
+        request = "http://" + encodeURIComponent(hostData.host)
+            + ":8080"
             + "/jsonrpc?request="
             + JSON.stringify(data);
     }

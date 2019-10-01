@@ -13,30 +13,10 @@ function checkInputFields(){
     host_pattern = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b$/;
     var matchHost = host_pattern.exec(host);
     if(!matchHost){
-        document.getElementById("host_error").innerHTML= "  invalid IP address";
+        document.getElementById("host_error").innerHTML= "  invalid!";
         valid = false;
     }else{
         document.getElementById("host_error").innerHTML= "";
-    }
-
-    var port = document.querySelector("#port").value;
-    port_pattern = /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
-    var matchPort = port_pattern.exec(port);
-    if(!matchPort){
-        document.getElementById("port_error").innerHTML= "  invalid port";
-        valid = false;
-    }else{
-        document.getElementById("port_error").innerHTML= "";
-    }
-
-    var user = document.querySelector("#user").value;
-    user_pattern = /^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/;
-    var matchUser = user_pattern.exec(user);
-    if(!matchUser){
-        document.getElementById("user_error").innerHTML= "  invalid username";
-        valid = false;
-    }else{
-        document.getElementById("user_error").innerHTML= "";
     }
     return valid;
 }
@@ -45,9 +25,6 @@ function checkInputFields(){
 function getHostDateFromInput(){
     hostData = {}
     hostData["host"] = document.querySelector("#host").value.replace("http://", "");
-    hostData["port"] = document.querySelector("#port").value;
-    hostData["user"] = document.querySelector("#user").value;
-    hostData["pass"] = document.querySelector("#pass").value;
     return hostData;
 }
 
@@ -88,9 +65,6 @@ function testConnection(e) {
 function saveHostData(){
     browser.storage.local.set({
         host: document.querySelector("#host").value.replace("http://", ""),
-        port: document.querySelector("#port").value,
-        user: document.querySelector("#user").value,
-        pass: document.querySelector("#pass").value
     });
 }
 
@@ -108,9 +82,6 @@ function saveOptions(e) {
 function restoreOptions() {
     var getting = browser.storage.local.get(null, function(result){
         document.querySelector("#host").value = result.host || '';
-        document.querySelector("#port").value = result.port || '';
-        document.querySelector("#user").value = result.user || '';
-        document.querySelector("#pass").value = result.pass || '';
     });
 }
 
