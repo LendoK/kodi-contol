@@ -7,9 +7,11 @@ var imagePattern = /\.(jpg|png)+/
 var twitchVideoPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/videos\/(\d+)/;
 var twitchVideoPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/videos\/(\d+)/;
 var twitchClipPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/.*\/clip\/([A-Za-z0-9_-]+).*/;
-var twitchClipPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/clips\/([A-Za-z0-9_-]+)+/
-var twitchChannelPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/([A-Za-z0-9_-]+)$/
-var twitchChannelPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/channels\/([A-Za-z0-9_-]+)\/(?!extensions)/
+var twitchClipPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/clips\/([A-Za-z0-9_-]+)+/;
+var twitchChannelPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/([A-Za-z0-9_-]+)$/;
+var twitchChannelPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/channels\/([A-Za-z0-9_-]+)\/(?!extensions)/;
+var arteVideoPattern = /^https?:\/\/www.arte.tv\/([A-Za-z0-9_-]+)\/videos\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)/;
+var arteVideoPattern2 = /^https?:\/\/api.arte.tv\/api\/player\/v1\/config\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)\?autostart/;
 
 /* global media_list */
 media_list = [];
@@ -80,6 +82,37 @@ function mediaFromURL(url){
         media["item"] = {"file": "plugin://plugin.video.vimeo/play/?video_id=" + media["id"]};
         return media;
     }
+     //arte
+    var matchVideo = arteVideoPattern.exec(url);
+    var matchVideo2 = arteVideoPattern2.exec(url);
+    if (matchVideo || matchVideo2) {
+
+        var mv = matchVideo2 ? matchVideo2 : matchVideo;
+        media["id"] = mv[2];
+        media['name'] = url;
+        media['type'] = "arte";
+        url = "https://api.arte.tv/api/player/v1/config/"+mv[1]+"/"+mv[2];
+        media['path'] = url;
+        media['domain'] = extractRootDomain(url);
+        media["played"] = false;
+        var file = fetch(url).then((r) => r.json())
+        .then(({ "videoJsonPlayer": { "VSR": data } }) => {
+            // Garder les vidéos dans la langue courante.
+            return Object.values(data).filter((f) => f.id.endsWith("_1"))
+                    // Sélectionner la vidéo avec la définition la plus grande.
+                    .reduce((b, f) => (b.height < f.height ? f : b))
+                    .url;
+        });
+        // file.then((f)=>{
+        //         var data = { "method": "Player.Open", "params": {"item": {"file": f}}};
+        //         sendRequestToHost(data, parseJSON);
+        //         console.log(f);
+
+        // });
+        media["promise"] = file;
+        media["item"] = {"file": ""};
+        return media;
+     }
      // twitch
      var matchVideo = twitchVideoPattern.exec(url);
      var matchVideo2 = twitchVideoPattern2.exec(url);
@@ -206,18 +239,26 @@ function set_badgeText() {
     }
 }
 
-function play_media(id, queue) {
-    if (media_list[id]) {
-        var data = { "method": "Player.Open", "params": {"item": media_list[id].item}};
+function play_media(media, queue) {
+    if (media) {
+        var data = { "method": "Player.Open", "params": {"item": media.item}};
         if (queue) {
             data["method"] = "Playlist.Add";
             data["params"]["playlistid"] = 1;
         }
-        sendRequestToHost(data, parseJSON);
+        if("promise" in media){
+            media.promise.then((f)=>{
+                data["params"]["item"]["file"] = f;
+                sendRequestToHost(data, parseJSON);
+                console.log(f);
+            });
+        }else{
+            sendRequestToHost(data, parseJSON);
+        }
 
-        if (media_list[id]["played"] == false) {
+        if (media["played"] == false) {
             unplayed -= 1;
-            media_list[id]["played"] = true;
+            media["played"] = true;
             set_badgeText();
         }
     } else {
@@ -293,8 +334,12 @@ function send_text() {
 
 function idToURL(id, mediaid) {
     switch (id) {
+        case "playmedia":
+            idToURL("b_stop", 0);
+            play_media(media_list[mediaid], false);
+            break;
         case "queue Media":
-            play_media(mediaid, true);
+            play_media(media_list[mediaid], true);
             break;
         case "b_clearlist":
             var data = { "method": "Playlist.Clear", "params": { "playlistid": 1 } };
@@ -368,10 +413,6 @@ function idToURL(id, mediaid) {
             var data = { "method": "Input.ExecuteAction", "params": ["pause"] };
             sendRequestToHost(data, parseJSON);
             break;
-        case "playmedia":
-            idToURL("b_stop", 0);
-            play_media(mediaid, false);
-            break;
         case "playing":
             sendRequestToHost();
             // play_media();
@@ -436,31 +477,36 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
     switch (info.menuItemId) {
         case "send-kodi":
             var media = mediaFromURL(info.srcUrl);
-            if(media){
-                var data = { "method": "Player.Open", "params": {"item": media.item}};
-                sendRequestToHost(data, parseJSON);
-            }
+            play_media(media, true);
             break;
         case "send-kodi-queue":
             var media = mediaFromURL(info.srcUrl);
-            if(media && media.type != "image"){
-                var data = { "method": "Playlist.Add", "params": {"playlistid": 1, "item": media.item}};
-                sendRequestToHost(data, parseJSON);
-            }
+                if(media && media.type != "image"){
+                    play_media(media, true);
+                }
             break;
         case "send-link-to-kodi":
             var media = mediaFromURL(info.linkUrl);
             if(media){
-                var data = { "method": "Player.Open", "params": {"item": media.item}};
-                sendRequestToHost(data, parseJSON);
+                // var data = { "method": "Player.Open", "params": {"item": media.item}};
+                // console.log(media.item);
+                // sendRequestToHost(data, parseJSON);
+                // media.item.then((file) =>{
+                //     // var data = { "method": "Player.Open", "params": {"item": file}};
+                //     console.log(file);
+
+                // });
+                // media.item.file.then((f)=>{
+                //     var data = { "method": "Player.Open", "params": {"item": {"file": f}}};
+                //     sendRequestToHost(data, parseJSON);
+                //     console.log(f);
+                // });
+                play_media(media, false);
             }
             break;
         case "send-link-to-kodi-queue":
             var media = mediaFromURL(info.linkUrl);
-            if(media){
-                var data = { "method": "Playlist.Add", "params": {"playlistid": 1, "item": media.item}};
-                sendRequestToHost(data, parseJSON);
-            }
+            play_media(media, true);
             break;
         }
     });
