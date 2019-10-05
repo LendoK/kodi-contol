@@ -162,7 +162,9 @@ function create_media_list(domain, mlist) {
             } else if(mlist[i]["type"] == "vimeo"){
                 div.className = "list item vimeo";
             }else if(mlist[i]["type"] == "twitch"){
-                    div.className = "list item twitch";
+                div.className = "list item twitch";
+            }else if(mlist[i]["type"] == "zdf"){
+                div.className = "list item zdf";
             }else {
                 div.className = "list item mp4";
             }

@@ -1,17 +1,3 @@
-var yt_videoPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{11})/;
-var yt_videoPattern2 = /^https?:\/\/youtu.be\/([A-Za-z0-9_-]{11})/;
-var yt_playlistPattern = /^https?:\/\/www\.youtube\.com\/.*[?&]list=([A-Za-z0-9_-]{34})/;
-var vimeo_videoPattern = /https?:\/\/vimeo\.com\/(\d+)(\?action=(log_stream_play|load_config))*/;
-var videoPattern = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/
-var imagePattern = /\.(jpg|png)+/
-var twitchVideoPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/videos\/(\d+)/;
-var twitchVideoPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/videos\/(\d+)/;
-var twitchClipPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/.*\/clip\/([A-Za-z0-9_-]+).*/;
-var twitchClipPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/clips\/([A-Za-z0-9_-]+)+/;
-var twitchChannelPattern = /^https?:\/\/(?:www.twitch.tv|go.twitch.tv|m.twitch.tv)\/([A-Za-z0-9_-]+)$/;
-var twitchChannelPattern2 = /^https?:\/\/(?:api.twitch.tv)\/.*\/channels\/([A-Za-z0-9_-]+)\/(?!extensions)/;
-var arteVideoPattern = /^https?:\/\/www.arte.tv\/([A-Za-z0-9_-]+)\/videos\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)/;
-var arteVideoPattern2 = /^https?:\/\/api.arte.tv\/api\/player\/v1\/config\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)\?autostart/;
 
 /* global media_list */
 media_list = [];
@@ -21,130 +7,6 @@ var host;
 var fullscreen = true;
 var unplayed = 0;
 
-
-//
-// ─── PARSE URL ──────────────────────────────────────────────────────────────────
-//
-
-function mediaFromURL(url){
-    var re = new RegExp(host);
-    if (re.test(url)) {
-        return null;
-    }
-    re = new RegExp("https://noembed.com/embed");
-    if (re.test(url)) {
-        return null;
-    }
-    var media = {};
-    // normal media
-    var matchVideo = videoPattern.exec(url);
-    var matchImage = imagePattern.exec(url);
-    if (matchVideo || matchImage) {
-        var filename = url.replace(/^.*[\\\/]/, '');
-        media['name'] = filename;
-        media['id'] = filename;
-        media['path'] = url;
-        media['type'] = matchImage ? "image" : "video";
-        media['domain'] = extractRootDomain(url);
-        media["played"] = false;
-        media["item"] = {"file": url}
-        return media;
-    }
-    // youtube
-    var matchVideo = yt_videoPattern.exec(url);
-    var matchVideo2 = yt_videoPattern2.exec(url);
-    var matchList = yt_playlistPattern.exec(url);
-    if (matchVideo || matchList || matchVideo2) {
-        if (matchVideo) {
-            media["id"]  = matchVideo[1];
-        } else if(matchList){
-            media["id"] = matchList[1];
-        } else {
-            media["id"] = matchVideo2[1];
-        }
-        media['name'] = url;
-        media['type'] = "youtube";
-        media['path'] = url;
-        media['domain'] = extractRootDomain(url);
-        media["played"] = false;
-        media["item"] = {"file": "plugin://plugin.video.youtube/play/?video_id="+ media["id"]};
-        return media;
-    }
-    //vimeo
-    var matchVideo = vimeo_videoPattern.exec(url);
-    if (matchVideo) {
-        media["id"] = matchVideo[1];
-        media['name'] = url;
-        media['type'] = "vimeo";
-        media['path'] = url;
-        media['domain'] = extractRootDomain(url);
-        media["played"] = false;
-        media["item"] = {"file": "plugin://plugin.video.vimeo/play/?video_id=" + media["id"]};
-        return media;
-    }
-     //arte
-    var matchVideo = arteVideoPattern.exec(url);
-    var matchVideo2 = arteVideoPattern2.exec(url);
-    if (matchVideo || matchVideo2) {
-
-        var mv = matchVideo2 ? matchVideo2 : matchVideo;
-        media["id"] = mv[2];
-        media['name'] = url;
-        media['type'] = "arte";
-        url = "https://api.arte.tv/api/player/v1/config/"+mv[1]+"/"+mv[2];
-        media['path'] = url;
-        media['domain'] = extractRootDomain(url);
-        media["played"] = false;
-        var file = fetch(url).then((r) => r.json())
-        .then(({ "videoJsonPlayer": { "VSR": data } }) => {
-            // Garder les vidéos dans la langue courante.
-            return Object.values(data).filter((f) => f.id.endsWith("_1"))
-                    // Sélectionner la vidéo avec la définition la plus grande.
-                    .reduce((b, f) => (b.height < f.height ? f : b))
-                    .url;
-        });
-        // file.then((f)=>{
-        //         var data = { "method": "Player.Open", "params": {"item": {"file": f}}};
-        //         sendRequestToHost(data, parseJSON);
-        //         console.log(f);
-
-        // });
-        media["promise"] = file;
-        media["item"] = {"file": ""};
-        return media;
-     }
-     // twitch
-     var matchVideo = twitchVideoPattern.exec(url);
-     var matchVideo2 = twitchVideoPattern2.exec(url);
-     var matchClip = twitchClipPattern.exec(url);
-     var matchClip2 = twitchClipPattern2.exec(url);
-     var matchChannel = twitchChannelPattern.exec(url);
-     var matchChannel2 = twitchChannelPattern2.exec(url);
-     if (matchVideo || matchVideo2 || matchChannel || matchChannel2 || matchClip || matchClip2) {
-         if (matchVideo || matchVideo2) {
-            media["id"] = matchVideo ? matchVideo[1] : matchVideo2[1];
-            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&video_id=" + media["id"]};
-            media["sub"] = "video";
-            media['name'] = media["id"];
-        } else if(matchChannel || matchChannel2){
-            media["id"] = matchChannel ? matchChannel[1] : matchChannel2[1];
-            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&channel_name=" + media["id"]};
-            media["sub"] = "channel";
-            media['name'] = media["id"];
-        } else {
-            media["id"] = matchClip ? matchClip[1] : matchClip2[1];
-            media["item"] = {"file": "plugin://plugin.video.twitch/?mode=play&slug=" + media["id"]};
-            media["sub"] = "clip";
-            media['name'] = media["id"];
-        }
-         media['type'] = "twitch";
-         media['path'] = url;
-         media['domain'] = extractRootDomain(url);
-         media["played"] = false;
-         return media;
-     }
-    return null;
-}
 
 //
 // ─── PREPARE MEDIA ──────────────────────────────────────────────────────────────
@@ -164,12 +26,12 @@ function addToMediaList(listEntry){
 }
 
 function logURL(requestDetails) {
-    var listEntry = mediaFromURL(requestDetails.url);
-    if(listEntry && listEntry["type"] != "image" && !checkIfInMedia(listEntry)){
-        if(listEntry.type == "vimeo" || listEntry.type == "youtube" || (listEntry.type == "twitch" && listEntry.sub == "video")){
-            getTitleInfo(listEntry);
+    var media = mediaFromURL(requestDetails.url);
+    if(media && media["type"] != "image" && !checkIfInMedia(media)){
+        if ("title_promise" in media) {
+            media.title_promise.then(() =>{if(!checkIfInMedia(media)) addToMediaList(media);});
         }else{
-            addToMediaList(listEntry);
+            addToMediaList(media);
         }
     }
 }
@@ -185,29 +47,32 @@ function checkIfInMedia(media){
 
 // get titile info via request to "https://noembed.com/embed"
 function getTitleInfo(media){
-    var xhr = new XMLHttpRequest();
-    if(media.type == "youtube"){
-        var url = 'https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + media.id
-    }else if(media.type == "vimeo"){
-        var url = 'https://noembed.com/embed?url=https://vimeo.com/' + media.id
-    }else {
-        var url = 'https://noembed.com/embed?url=https://www.twitch.tv/videos/' + media.id
+    // var xhr = new XMLHttpRequest();
+    // if(media.type == "youtube"){
+    //     var url = 'https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + media.id
+    // }else if(media.type == "vimeo"){
+    //     var url = 'https://noembed.com/embed?url=https://vimeo.com/' + media.id
+    // }else {
+    //     var url = 'https://noembed.com/embed?url=https://www.twitch.tv/videos/' + media.id
+    // }
+    // xhr.open("GET", url, true);
+    // xhr.timeout = 2000;
+    // xhr.onreadystatechange = function(aEvt) {
+    //     if (xhr.readyState == 4) {
+    //         if (xhr.status == 200) {
+    //             var resp = xhr.responseText;
+    //             var title_info = JSON.parse(resp);
+    //             media["name"] = title_info.title;
+    //             if(!checkIfInMedia(media)) addToMediaList(media);
+    //             return;
+    //         }
+    //     }
+    //     if(!checkIfInMedia(media)) addToMediaList(media);
+    // }
+    // xhr.send(null);
+    if ("title_promise" in media) {
+        media.title_promise.then(() =>{addToMediaList(media);});
     }
-    xhr.open("GET", url, true);
-    xhr.timeout = 2000;
-    xhr.onreadystatechange = function(aEvt) {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                var resp = xhr.responseText;
-                var title_info = JSON.parse(resp);
-                media["name"] = title_info.title;
-                if(!checkIfInMedia(media)) addToMediaList(media);
-                return;
-            }
-        }
-        if(!checkIfInMedia(media)) addToMediaList(media);
-    }
-    xhr.send(null);
 }
 
 function getUnplayedPerPage(){
@@ -250,7 +115,7 @@ function play_media(media, queue) {
             media.promise.then((f)=>{
                 data["params"]["item"]["file"] = f;
                 sendRequestToHost(data, parseJSON);
-                console.log(f);
+                // console.log(f);
             });
         }else{
             sendRequestToHost(data, parseJSON);
@@ -488,19 +353,6 @@ browser.contextMenus.onClicked.addListener(function (info, tab) {
         case "send-link-to-kodi":
             var media = mediaFromURL(info.linkUrl);
             if(media){
-                // var data = { "method": "Player.Open", "params": {"item": media.item}};
-                // console.log(media.item);
-                // sendRequestToHost(data, parseJSON);
-                // media.item.then((file) =>{
-                //     // var data = { "method": "Player.Open", "params": {"item": file}};
-                //     console.log(file);
-
-                // });
-                // media.item.file.then((f)=>{
-                //     var data = { "method": "Player.Open", "params": {"item": {"file": f}}};
-                //     sendRequestToHost(data, parseJSON);
-                //     console.log(f);
-                // });
                 play_media(media, false);
             }
             break;

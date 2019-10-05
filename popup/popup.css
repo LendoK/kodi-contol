@@ -186,11 +186,30 @@ ul {
   background-size: 21px 21px;
   background-repeat:no-repeat;
   background-position: 1.5% 50%;
+}
+
+.zdf {
+  background-image: url('/icons/zdf.svg');
 
 }
+.zdf:hover {
+  background: #eee url('/icons/zdf.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+}
+
+
 .vimeo {
   background-image: url('/icons/Vimeo.svg');
 
+}
+.vimeo:hover {
+  background: #eee url('/icons/Vimeo.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+  
 }
 
 .twitch {
@@ -202,15 +221,6 @@ ul {
   background-size: 21px 21px;
   background-repeat:no-repeat;
   background-position: 1.5% 50%;
-
-}
-
-.vimeo:hover {
-  background: #eee url('/icons/Vimeo.svg');
-  background-size: 21px 21px;
-  background-repeat:no-repeat;
-  background-position: 1.5% 50%;
-
 }
 .mp4 {
   background-image: url('/icons/MP4_icon.svg');

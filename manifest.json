@@ -39,7 +39,18 @@
   },
 
   "background": {
-      "scripts": ["global.js", "background.js"]
+      "scripts": [
+        "global.js",
+        "./media_sources/arte.js",
+        "./media_sources/ard.js",
+        "./media_sources/generic_image.js",
+        "./media_sources/generic_video.js",
+        "./media_sources/twitch.js",
+        "./media_sources/vimeo.js",
+        "./media_sources/youtube.js",
+        "./media_sources/zdf.js",
+        "abstreifer.js",
+        "background.js"]
   },
 
   "content_scripts": [
