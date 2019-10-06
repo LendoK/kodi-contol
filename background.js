@@ -6,7 +6,7 @@ var kodi_mute
 var host;
 var fullscreen = true;
 var unplayed = 0;
-
+var currentUrl;
 
 //
 // ─── PREPARE MEDIA ──────────────────────────────────────────────────────────────
@@ -27,18 +27,18 @@ function addToMediaList(listEntry){
 
 function logURL(requestDetails) {
     var media = mediaFromURL(requestDetails.url);
-    if(media && media["type"] != "image" && !checkIfInMedia(media)){
+    if(media && media["type"] != "image" && !checkIfInMedia(media.id)){
         if ("title_promise" in media) {
-            media.title_promise.then(() =>{if(!checkIfInMedia(media)) addToMediaList(media);});
+            media.title_promise.then(() =>{if(!checkIfInMedia(media.id)) addToMediaList(media);});
         }else{
             addToMediaList(media);
         }
     }
 }
 
-function checkIfInMedia(media){
+function checkIfInMedia(id){
     for (i = 0; i < media_list.length; i++) {
-        if (media_list[i]['id'] == media['id']) {
+        if (media_list[i]['id'] == id) {
             return true;
         }
     }
