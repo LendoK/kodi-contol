@@ -1,5 +1,5 @@
 var video = function(url){
-    var match = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)+/.exec(url);
+    var match = /\.(mp4|mkv|mov|avi|flv|wmv|asf|mp3|flac|mka|m4a)(?!\.csmil)/.exec(url);
     if (match) {
         var media = {};
         var filename = url.replace(/^.*[\\\/]/, '');

@@ -165,6 +165,10 @@ function create_media_list(domain, mlist) {
                 div.className = "list item twitch";
             }else if(mlist[i]["type"] == "zdf"){
                 div.className = "list item zdf";
+            }else if(mlist[i]["type"] == "arte"){
+                div.className = "list item arte";
+            }else if(mlist[i]["type"] == "ard"){
+                div.className = "list item ard";
             }else {
                 div.className = "list item mp4";
             }

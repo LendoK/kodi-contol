@@ -188,12 +188,34 @@ ul {
   background-position: 1.5% 50%;
 }
 
+.ard {
+  background-image: url('/icons/ard.svg');
+
+}
+.ard:hover {
+  background: #eee url('/icons/ard.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+}
+
 .zdf {
   background-image: url('/icons/zdf.svg');
 
 }
 .zdf:hover {
   background: #eee url('/icons/zdf.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+}
+
+.arte {
+  background-image: url('/icons/arte.svg');
+
+}
+.arte:hover {
+  background: #eee url('/icons/arte.svg');
   background-size: 21px 21px;
   background-repeat:no-repeat;
   background-position: 1.5% 50%;
@@ -209,7 +231,7 @@ ul {
   background-size: 21px 21px;
   background-repeat:no-repeat;
   background-position: 1.5% 50%;
-  
+
 }
 
 .twitch {

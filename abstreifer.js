@@ -1,10 +1,21 @@
-// import { abstreifer as zdf } from "./media_sources/zdf.js";
 
+function checkURL(url){
+    var re = new RegExp(host);
+    var ping = new RegExp(/(ping.gif)+/i);
+    if (re.test(url)) {
+        return false;
+    } else if (ping.test(url)) {
+        return false;
+    }
+    return true;
+}
 
 function mediaFromURL(url){
-    for(var i = 0; i < scharber.length; i++){
-        var media = scharber[i](url);
-        if(media) return media;
+    if(checkURL(url)){
+        for(var i = 0; i < scharber.length; i++){
+            var media = scharber[i](url);
+            if(media) return media;
+        }
     }
     return null;
 }

@@ -106,6 +106,24 @@ function sendRequest(data, hostData, func, note, error_func, final_func, methode
     }
 }
 
+function stringFormat(item){
+    var string = JSON.stringify(item);
+    console.log(string);
+    return string.replace(/"/g, '%22').replace(/{/g,'%7B').replace(/,/g, '%2C').replace(/}/g, '%7D').replace(/:/g, '%3A');
+}
+
+function encodeQueryData(data) {
+    var k;
+    var ret = [];
+    for (k in data) {
+        if (data[k] != '') {
+            ret.push((k) + '=' + data[k]);
+        }
+    }
+    return escape(ret.join('&'));
+}
+
+
 function enableBrowserAction(){
     browser.browserAction.enable();
     browser.browserAction.setTitle({"title": "KodiControl: connected"})

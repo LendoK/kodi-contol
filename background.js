@@ -45,36 +45,6 @@ function checkIfInMedia(id){
     return false;
 }
 
-// get titile info via request to "https://noembed.com/embed"
-function getTitleInfo(media){
-    // var xhr = new XMLHttpRequest();
-    // if(media.type == "youtube"){
-    //     var url = 'https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + media.id
-    // }else if(media.type == "vimeo"){
-    //     var url = 'https://noembed.com/embed?url=https://vimeo.com/' + media.id
-    // }else {
-    //     var url = 'https://noembed.com/embed?url=https://www.twitch.tv/videos/' + media.id
-    // }
-    // xhr.open("GET", url, true);
-    // xhr.timeout = 2000;
-    // xhr.onreadystatechange = function(aEvt) {
-    //     if (xhr.readyState == 4) {
-    //         if (xhr.status == 200) {
-    //             var resp = xhr.responseText;
-    //             var title_info = JSON.parse(resp);
-    //             media["name"] = title_info.title;
-    //             if(!checkIfInMedia(media)) addToMediaList(media);
-    //             return;
-    //         }
-    //     }
-    //     if(!checkIfInMedia(media)) addToMediaList(media);
-    // }
-    // xhr.send(null);
-    if ("title_promise" in media) {
-        media.title_promise.then(() =>{addToMediaList(media);});
-    }
-}
-
 function getUnplayedPerPage(){
     browser.tabs.query({currentWindow: true, active: true})
     .then((tabs) => {
@@ -115,7 +85,7 @@ function play_media(media, queue) {
             media.promise.then((f)=>{
                 data["params"]["item"]["file"] = f;
                 sendRequestToHost(data, parseJSON);
-                // console.log(f);
+                console.log(f);
             });
         }else{
             sendRequestToHost(data, parseJSON);
@@ -414,7 +384,7 @@ window.setInterval(function(){
 
 browser.webRequest.onBeforeRequest.addListener(
     logURL,
-    { urls: ["<all_urls>"] }
+    { urls: ["<all_urls>"], types: ["media", "xmlhttprequest"]}
     );
 
 browser.runtime.onMessage.addListener(handleMessage);

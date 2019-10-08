@@ -1,18 +1,18 @@
 {
    "contextSendToKodi": {
-    "message": "send to kodi",
+    "message": "an Kodi senden",
     "description": "send clicked media to kodi"
   },
   "contextSendToKodiQueue": {
-    "message": "send to kodi queue",
+    "message": "in Kodi Warteschlange einreihen",
     "description": "send clicked media to kodi queue"
   },
   "contextSendLinkToKodi": {
-    "message": "send link to kodi",
+    "message": "Link an Kodi senden",
     "description": "send clicked link to kodi"
   },
   "contextSendLinkToKodiQueue": {
-    "message": "send link to kodi queue",
+    "message": " link in Kodi Warteschlange einreihen",
     "description": "send clicked link to kodi"
   }
 }

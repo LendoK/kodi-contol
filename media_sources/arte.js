@@ -1,6 +1,6 @@
 
 var arte = function(url){
-    var matchVideo = /^https?:\/\/www.arte.tv\/([A-Za-z0-9_-]+)\/videos\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)+/.exec(url);
+    var matchVideo = /^https?:\/\/www.arte.tv\/([A-Za-z0-9_-]+)\/videos\/(?!RC)([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)+/.exec(url);
     var matchVideo2 = /^https?:\/\/api.arte.tv\/api\/player\/v1\/config\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_-]+)\?autostart/.exec(url);
     if (matchVideo || matchVideo2) {
         var media = {};
