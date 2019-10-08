@@ -20,7 +20,6 @@ var arte = function(url){
         });
         media["title_promise"] = fetch(url).then((r) => r.json())
         .then(({ "videoJsonPlayer": { "VTI": title} }) => {
-            console.log(title);
             media.name = title;
             return title;
         });
