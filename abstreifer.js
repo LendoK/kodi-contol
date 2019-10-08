@@ -1,10 +1,15 @@
 
 function checkURL(url){
     var re = new RegExp(host);
-    var ping = new RegExp(/(ping.gif)+/i);
     if (re.test(url)) {
         return false;
-    } else if (ping.test(url)) {
+    }
+    // re = new RegExp(/(ping.gif)+/i);
+    // if (re.test(url)) {
+    //     return false;
+    // }
+    re = new RegExp("https://noembed.com/embed");
+    if (re.test(url)) {
         return false;
     }
     return true;
