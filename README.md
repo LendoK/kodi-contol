@@ -25,6 +25,7 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 * send vimeo videos to kodi (vimeo addon required)
 * send twitch videos to kodi (twitch addon required)
 * send images and videos from contextmenu
+* send ard, zdf, arte videos to kodi(beta)
 
 ## Settings
 * IP address of Kodi
