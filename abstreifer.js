@@ -8,6 +8,10 @@ function checkURL(url){
     // if (re.test(url)) {
     //     return false;
     // }
+    re = new RegExp(/.*\?null\=0/);
+    if (re.test(url)) {
+        return false;
+    }
     re = new RegExp("https://noembed.com/embed");
     if (re.test(url)) {
         return false;

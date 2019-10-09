@@ -85,7 +85,6 @@ function play_media(media, queue) {
             media.promise.then((f)=>{
                 data["params"]["item"]["file"] = f;
                 sendRequestToHost(data, parseJSON);
-                console.log(f);
             });
         }else{
             sendRequestToHost(data, parseJSON);
@@ -349,7 +348,8 @@ function handleMessage(request, sender, sendResponse) {
         kodi_volume = request.volume;
     }
     getKodiState();
-    sendResponse({ response: "Response from background script", url: media_list, volume: kodi_volume, muted: kodi_mute});
+    var newList = JSON.parse(JSON.stringify(media_list));
+    sendResponse({ response: "Response from background script", url: newList, volume: kodi_volume, muted: kodi_mute});
 
 }
 

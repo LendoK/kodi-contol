@@ -1,8 +1,9 @@
 
 var ard = function(url){
     // var matchVideo = /^https:\/\/www.ardmediathek\.de\/([A-Za-z0-9_-]+)\/player\/([A-Za-z0-9_-]+)/.exec(url);
-    var matchVideo = /^https:\/\/api\.ardmediathek\.de\/public-gateway\?variables\=\%7B\%22client%22%3A%22([A-Za-z0-9_-]+)%22%2C%22clipId%22%3A.*/.exec(url);
+
     if (checkIfInMedia(url) || currentUrl == url) return;
+    var matchVideo = /^https:\/\/api\.ardmediathek\.de\/public-gateway\?variables\=\%7B\%22client%22%3A%22([A-Za-z0-9_-]+)%22%2C%22clipId%22%3A.*/.exec(url);
     if (matchVideo) {
         var media = {};
         currentUrl = url;
