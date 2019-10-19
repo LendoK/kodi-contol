@@ -2,7 +2,7 @@
 
 ## About
 Firefox Extension to control Kodi remotely. Sending videos, music and pictures to Kodi.
-Based on Youtube to Kodi by Regss.
+Based on Youtube to Kodi by Regss. https://addons.mozilla.org/de/firefox/addon/kodi-control/
 
 ## How to use
 * set up the settings on the addons page
