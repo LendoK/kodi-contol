@@ -2,6 +2,7 @@
 
 ## About
 Firefox Extension to control Kodi remotely. Sending videos, music and pictures to Kodi.
+Based on Youtube to Kodi by Regss.
 
 ## How to use
 * set up the settings on the addons page
@@ -30,6 +31,8 @@ Firefox Extension to control Kodi remotely. Sending videos, music and pictures t
 ## Settings
 * IP address of Kodi
 
+## Video
+https://youtu.be/KVl9tbku-ZE
 
 ## Licence
 GPL 3.0
