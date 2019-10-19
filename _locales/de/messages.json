@@ -12,7 +12,7 @@
     "description": "send clicked link to kodi"
   },
   "contextSendLinkToKodiQueue": {
-    "message": " Link in Kodi Warteschlange einreihen",
+    "message": "Link in Kodi Warteschlange einreihen",
     "description": "send clicked link to kodi"
   }
 }
