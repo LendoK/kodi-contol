@@ -104,10 +104,21 @@ function OnKeyDown(e) {
             startaction("right", 0)
             break;
         case "Enter":
-            startaction("ok", 0)
+            if (document.activeElement.id == "textfield")
+            {
+                startaction("text", 0)
+                document.activeElement.blur()
+            }
+            else
+            {
+                startaction("ok", 0)
+            }
             break;
         case "Backspace":
-            startaction("back", 0)
+            if (document.activeElement.id != "textfield")
+            {
+                startaction("back", 0)
+            }
             break;
         case "Space":
             startaction("right", 0)
