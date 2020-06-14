@@ -32,6 +32,8 @@ Based on Youtube to Kodi by Regss. https://addons.mozilla.org/de/firefox/addon/k
 * IP address of Kodi
 
 ## Video
+https://lbry.tv/@LendoKe:9/kodi_control_lbry
+
 https://youtu.be/KVl9tbku-ZE
 
 ## Licence
