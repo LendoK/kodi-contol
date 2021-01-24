@@ -37,5 +37,6 @@ var scharber = [
     twitch,
     image,
     video,
-    youtube
+    youtube,
+    lbry
 ]
