@@ -1,9 +1,9 @@
 var lbry = function(url){
-    var matchVideo = /https?:\/\/vimeo\.com\/(\d+)(\?action=(log_stream_play|load_config))*/.exec(url);
+    var matchVideo = /https?:\/\/cdn.lbryplayer.xyz\/api\/v4\/streams\/([A-Za-z0-9_-]*)\/([A-Za-z0-9_-]*)\/([A-Za-z0-9_-]*)\/([0-9_-]*)/.exec(url);
     if (matchVideo) {
         var media = {}; 
-        media["id"] = matchVideo[1];
-        media['name'] = url;
+        media["id"] = matchVideo[2];
+        media['name'] = matchVideo[2];
         media['type'] = "lbry";
         media['path'] = url;
         media['domain'] = extractRootDomain(url);

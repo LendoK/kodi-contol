@@ -158,7 +158,8 @@ function create_media_list(domain, mlist) {
         list.removeChild(list.firstChild);
     }
     for (var i = mlist.length -1; i >= 0 ; i--) {
-        if(domain == mlist[i]["domain"]){
+        if(true){
+        // if(domain == mlist[i]["domain"]){
             var container = document.createElement("div");
             var node = document.createElement("LI");                 // Create a <li> node
             var div = document.createElement("div");
@@ -180,6 +181,8 @@ function create_media_list(domain, mlist) {
                 div.className = "list item arte";
             }else if(mlist[i]["type"] == "ard"){
                 div.className = "list item ard";
+            }else if(mlist[i]["type"] == "lbry"){
+                div.className = "list item lbry";
             }else {
                 div.className = "list item mp4";
             }
