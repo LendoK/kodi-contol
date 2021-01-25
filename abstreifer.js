@@ -30,13 +30,13 @@ function mediaFromURL(url){
 }
 
 var scharber = [
-    // ard,
-    // zdf,
-    // arte,
-    // vimeo,
-    // twitch,
-    lbry
-    // image,
-    // video,
-    // youtube
+    ard,
+    zdf,
+    arte,
+    vimeo,
+    twitch,
+    lbry,
+    image,
+    video,
+    youtube
 ]

@@ -158,8 +158,7 @@ function create_media_list(domain, mlist) {
         list.removeChild(list.firstChild);
     }
     for (var i = mlist.length -1; i >= 0 ; i--) {
-        if(true){
-        // if(domain == mlist[i]["domain"]){
+        if(domain == mlist[i]["domain"]){
             var container = document.createElement("div");
             var node = document.createElement("LI");                 // Create a <li> node
             var div = document.createElement("div");
