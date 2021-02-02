@@ -180,6 +180,8 @@ function create_media_list(domain, mlist) {
                 div.className = "list item arte";
             }else if(mlist[i]["type"] == "ard"){
                 div.className = "list item ard";
+            }else if(mlist[i]["type"] == "lbry"){
+                div.className = "list item lbry";
             }else {
                 div.className = "list item mp4";
             }

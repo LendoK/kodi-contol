@@ -234,6 +234,17 @@ ul {
 
 }
 
+.lbry {
+  background-image: url('/icons/lbry.svg');
+
+}
+.lbry:hover {
+  background: #eee url('/icons/lbry.svg');
+  background-size: 21px 21px;
+  background-repeat:no-repeat;
+  background-position: 1.5% 50%;
+
+}
 .twitch {
   background-image: url('/icons/twitch.svg');
 
